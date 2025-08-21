@@ -1,0 +1,5 @@
+{
+  "name": "QuestBox",
+  "description": "QuestBox is a seasonal, theme-driven, gamified life app for a kid. It tracks tasks, awards XP, and allows unlocking rewards. It supports streaks, PIN-gated actions, and seasonal/auto themes.",
+  "requestFramePermissions": []
+}

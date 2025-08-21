@@ -1,0 +1,27 @@
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QuestBox XP Policy Schema",
+  "type": "object",
+  "properties": {
+    "xpPerLevel": { "type": "integer", "minimum": 1 },
+    "dailyXpCap": { "type": "integer", "minimum": 0 },
+    "streakBonus": {
+      "type": "object",
+      "properties": {
+        "days": { "type": "integer", "minimum": 1 },
+        "multiplier": { "type": "number", "minimum": 1 }
+      },
+      "required": ["days", "multiplier"]
+    },
+    "diminishingReturns": {
+      "type": "object",
+      "properties": {
+        "afterTaskCount": { "type": "integer", "minimum": 1 },
+        "reductionFactor": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["afterTaskCount", "reductionFactor"]
+    }
+  },
+  "required": ["xpPerLevel", "dailyXpCap"]
+}

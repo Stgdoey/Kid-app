@@ -1,0 +1,43 @@
+
+[
+  {
+    "id": "screen_time_30",
+    "name": "30 Mins Screen Time",
+    "description": "Extra time for games or videos.",
+    "cost": 100,
+    "limit": { "type": "daily", "count": 2 },
+    "needsApproval": true
+  },
+  {
+    "id": "ice_cream",
+    "name": "Ice Cream Treat",
+    "description": "A yummy bowl of your favorite ice cream.",
+    "cost": 150,
+    "limit": { "type": "weekly", "count": 2 },
+    "needsApproval": true
+  },
+  {
+    "id": "new_book",
+    "name": "Choose a New Book",
+    "description": "Pick out a new book to read.",
+    "cost": 400,
+    "limit": { "type": "monthly", "count": 1 },
+    "needsApproval": false
+  },
+  {
+    "id": "movie_night",
+    "name": "Family Movie Night",
+    "description": "You get to pick the movie!",
+    "cost": 500,
+    "limit": { "type": "weekly", "count": 1 },
+    "needsApproval": false
+  },
+  {
+    "id": "stay_up_late",
+    "name": "Stay Up 30 Mins Late",
+    "description": "A little extra time before bed.",
+    "cost": 250,
+    "limit": { "type": "weekly", "count": 1 },
+    "needsApproval": true
+  }
+]

@@ -1,0 +1,13 @@
+
+{
+  "xpPerLevel": 500,
+  "dailyXpCap": 200,
+  "streakBonus": {
+    "days": 3,
+    "multiplier": 1.5
+  },
+  "diminishingReturns": {
+    "afterTaskCount": 5,
+    "reductionFactor": 0.5
+  }
+}

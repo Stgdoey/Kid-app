@@ -1,0 +1,93 @@
+
+{
+  "default_light": {
+    "name": "Default Light",
+    "styles": {
+      "bg": "bg-slate-100",
+      "primary": "bg-white",
+      "secondary": "bg-slate-200",
+      "accent": "bg-blue-500",
+      "text": "text-slate-800"
+    }
+  },
+  "default_dark": {
+    "name": "Default Dark",
+    "styles": {
+      "bg": "bg-slate-900",
+      "primary": "bg-slate-800",
+      "secondary": "bg-slate-700",
+      "accent": "bg-sky-500",
+      "text": "text-slate-100"
+    }
+  },
+  "forest": {
+    "name": "Forest Adventure",
+    "styles": {
+      "bg": "bg-emerald-900",
+      "primary": "bg-emerald-800",
+      "secondary": "bg-emerald-700",
+      "accent": "bg-amber-400",
+      "text": "text-stone-100"
+    }
+  },
+  "ocean": {
+    "name": "Ocean Depths",
+    "styles": {
+      "bg": "bg-blue-900",
+      "primary": "bg-blue-800",
+      "secondary": "bg-blue-700",
+      "accent": "bg-cyan-300",
+      "text": "text-slate-100"
+    }
+  },
+  "space": {
+    "name": "Cosmic Voyager",
+    "styles": {
+      "bg": "bg-indigo-950",
+      "primary": "bg-indigo-900",
+      "secondary": "bg-slate-800",
+      "accent": "bg-fuchsia-500",
+      "text": "text-slate-200"
+    }
+  },
+  "autumn": {
+    "name": "Autumn",
+    "styles": {
+      "bg": "bg-orange-950",
+      "primary": "bg-orange-900",
+      "secondary": "bg-amber-800",
+      "accent": "bg-yellow-400",
+      "text": "text-orange-100"
+    }
+  },
+  "winter": {
+    "name": "Winter",
+    "styles": {
+      "bg": "bg-slate-700",
+      "primary": "bg-slate-600",
+      "secondary": "bg-sky-900",
+      "accent": "bg-cyan-400",
+      "text": "text-white"
+    }
+  },
+  "spring": {
+    "name": "Spring",
+    "styles": {
+      "bg": "bg-green-100",
+      "primary": "bg-green-200",
+      "secondary": "bg-pink-200",
+      "accent": "bg-pink-400",
+      "text": "text-green-900"
+    }
+  },
+  "summer": {
+    "name": "Summer",
+    "styles": {
+      "bg": "bg-yellow-100",
+      "primary": "bg-yellow-200",
+      "secondary": "bg-sky-300",
+      "accent": "bg-orange-500",
+      "text": "text-gray-800"
+    }
+  }
+}

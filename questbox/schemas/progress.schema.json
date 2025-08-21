@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QuestBox All Progress Schema",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z0-9_]+$": {
+      "type": "object",
+      "properties": {
+        "xp": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "lastCompletionDate": { "type": ["string", "null"] },
+        "dailyCompletions": {
+          "type": "object",
+          "patternProperties": {
+            "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "purchasedRewards": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_]+$": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "streakSavers": { "type": "integer" }
+      },
+      "required": [
+        "xp",
+        "streak",
+        "lastCompletionDate",
+        "dailyCompletions",
+        "purchasedRewards",
+        "streakSavers"
+      ]
+    }
+  }
+}

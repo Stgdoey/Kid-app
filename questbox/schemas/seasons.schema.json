@@ -1,0 +1,23 @@
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QuestBox Seasons Schema",
+  "type": "object",
+  "properties": {
+    "seasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "theme": { "type": "string" },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" }
+        },
+        "required": ["name", "theme", "startDate", "endDate"]
+      }
+    },
+    "fallbackTheme": { "type": "string" }
+  },
+  "required": ["seasons", "fallbackTheme"]
+}

@@ -1,0 +1,30 @@
+
+{
+  "seasons": [
+    {
+      "name": "Spring",
+      "theme": "spring",
+      "startDate": "2024-03-20",
+      "endDate": "2024-06-20"
+    },
+    {
+      "name": "Summer",
+      "theme": "summer",
+      "startDate": "2024-06-21",
+      "endDate": "2024-09-22"
+    },
+    {
+      "name": "Autumn",
+      "theme": "autumn",
+      "startDate": "2024-09-23",
+      "endDate": "2024-12-20"
+    },
+    {
+      "name": "Winter",
+      "theme": "winter",
+      "startDate": "2024-12-21",
+      "endDate": "2025-03-19"
+    }
+  ],
+  "fallbackTheme": "default_light"
+}
