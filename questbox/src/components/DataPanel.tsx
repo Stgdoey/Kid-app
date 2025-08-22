@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Progress, ThemeStyle } from '@/src/types';
+import { Progress, ThemeStyle } from '../types';
 
 interface DataPanelProps {
   onResetProgress: () => void;

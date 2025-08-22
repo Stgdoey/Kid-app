@@ -1,6 +1,6 @@
 
-import { Progress, Task } from '@/src/types';
-import { getTodayDateString } from '@/src/lib/utils';
+import { Progress, Task } from '../types';
+import { getTodayDateString } from './utils';
 
 /**
  * Filters the list of all tasks to show only those available to the user.

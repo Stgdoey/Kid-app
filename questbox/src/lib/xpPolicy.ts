@@ -1,6 +1,6 @@
 
-import { Progress, Task, XPPolicy } from '@/src/types';
-import { getTodayDateString } from '@/src/lib/utils';
+import { Progress, Task, XPPolicy } from '../types';
+import { getTodayDateString } from './utils';
 
 /**
  * Calculates the user's current level and progress towards the next level.

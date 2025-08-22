@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Task } from '@/src/types';
+import { Task } from '../types';
 
 // This type is for the raw AI response before we format it into a Task
 type GeneratedTaskData = Omit<Task, 'id'>;
@@ -63,13 +63,17 @@ export async function generateQuest(): Promise<GeneratedTaskData> {
         throw new Error("AI response is missing required fields or has incorrect types.");
     }
     
-    // Clamp XP to a reasonable range just in case the AI goes wild.
+    // Clamp the XP value to be within a reasonable range (e.g., 10-100)
     generatedData.xp = Math.max(10, Math.min(100, generatedData.xp));
-
+    
     return generatedData;
+
   } catch (error) {
     console.error("Error generating quest:", error);
-    // Re-throw a more user-friendly error to be displayed in the UI.
-    throw new Error("Failed to generate a new quest. The AI might be busy.");
+    // Provide a more user-friendly error message for the UI.
+    if (error instanceof Error && error.message.includes("SAFETY")) {
+        throw new Error("The generated quest was blocked for safety reasons. Please try again.");
+    }
+    throw new Error("Failed to generate a new quest. The AI might be busy or an error occurred.");
   }
 }

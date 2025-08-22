@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Progress, Reward, XPPolicy } from '@/src/types';
-import { calculateLevel } from '@/src/lib/xpPolicy';
+import { Progress, Reward, XPPolicy } from '../types';
+import { calculateLevel } from '../lib/xpPolicy';
 
 interface HUDProps {
   progress: Progress;
@@ -31,4 +31,17 @@ const HUD: React.FC<HUDProps> = ({ progress, xpPolicy, rewards }) => {
            <span>Level Progress</span>
            <span className="font-semibold">{xpInLevel} / {xpToNextLevel} XP</span>
          </div>
-         <div className="w-full bg-slate-700 rounded-
+         <div className="w-full bg-slate-700 rounded-full h-2.5">
+           <div className="bg-amber-400 h-2.5 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+         </div>
+         {nextReward && (
+          <div className="text-xs text-amber-300 mt-1 text-right">
+            Next: {nextReward.name} ({nextReward.cost} XP)
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default HUD;

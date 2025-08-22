@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ThemesConfig, SeasonsConfig, Theme } from '@/src/types';
-import { getActiveSeasonTheme } from '@/src/lib/seasonsLoader';
+import { ThemesConfig, SeasonsConfig, Theme } from '../types';
+import { getActiveSeasonTheme } from '../lib/seasonsLoader';
 
 interface ThemePickerProps {
   themes: ThemesConfig;

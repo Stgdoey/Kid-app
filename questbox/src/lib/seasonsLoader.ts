@@ -1,5 +1,5 @@
 
-import { SeasonsConfig } from '@/src/types';
+import { SeasonsConfig } from '../types';
 
 /**
  * Determines the active seasonal theme based on the current date.
