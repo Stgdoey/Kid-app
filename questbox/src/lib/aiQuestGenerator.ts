@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Task } from '../types';
+import { Task } from '@/src/types';
 
 // This type is for the raw AI response before we format it into a Task
 type GeneratedTaskData = Omit<Task, 'id'>;

@@ -9,28 +9,28 @@ import {
   SeasonsConfig,
   XPPolicy as IXPPolicy,
   AllProgress,
-} from './types';
-import { loadProgress, saveProgress, resetAllProgress } from './lib/storage';
-import { usePinVerification } from './lib/pin';
+} from '@/src/types';
+import { loadProgress, saveProgress, resetAllProgress } from '@/src/lib/storage';
+import { usePinVerification } from '@/src/lib/pin';
 
 // Import config data
-import tasksData from '../config/tasks.json';
-import rewardsData from '../config/rewards.json';
-import profilesData from '../config/profiles.json';
-import themesData from '../config/themes.json';
-import seasonsData from '../config/seasons.json';
-import xpPolicyData from '../config/xpPolicy.json';
+import tasksData from '@/config/tasks.json';
+import rewardsData from '@/config/rewards.json';
+import profilesData from '@/config/profiles.json';
+import themesData from '@/config/themes.json';
+import seasonsData from '@/config/seasons.json';
+import xpPolicyData from '@/config/xpPolicy.json';
 
 // Import components and libs
-import HUD from './components/HUD';
-import TaskList from './components/TaskList';
-import RewardShop from './components/RewardShop';
-import ThemePicker from './components/ThemePicker';
-import DataPanel from './components/DataPanel';
-import Leaderboard from './components/Leaderboard';
-import ProfileSelector from './components/ProfileSelector';
-import { processTaskCompletion } from './lib/xpPolicy';
-import { generateQuest } from './lib/aiQuestGenerator';
+import HUD from '@/src/components/HUD';
+import TaskList from '@/src/components/TaskList';
+import RewardShop from '@/src/components/RewardShop';
+import ThemePicker from '@/src/components/ThemePicker';
+import DataPanel from '@/src/components/DataPanel';
+import Leaderboard from '@/src/components/Leaderboard';
+import ProfileSelector from '@/src/components/ProfileSelector';
+import { processTaskCompletion } from '@/src/lib/xpPolicy';
+import { generateQuest } from '@/src/lib/aiQuestGenerator';
 
 const App: React.FC = () => {
   // Config state now includes tasks that can be updated with AI quests

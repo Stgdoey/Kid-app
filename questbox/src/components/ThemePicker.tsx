@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ThemesConfig, SeasonsConfig } from '../types';
-import { getActiveSeasonTheme } from '../lib/seasonsLoader';
+import { ThemesConfig, SeasonsConfig, Theme } from '@/src/types';
+import { getActiveSeasonTheme } from '@/src/lib/seasonsLoader';
 
 interface ThemePickerProps {
   themes: ThemesConfig;
@@ -59,7 +59,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
                 className="bg-slate-700 text-white text-sm rounded-md p-1 border-transparent focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             >
                 {Object.entries(themes).map(([key, theme]) => (
-                    <option key={key} value={key}>{theme.name}</option>
+                    <option key={key} value={key}>{(theme as Theme).name}</option>
                 ))}
             </select>
         )}
