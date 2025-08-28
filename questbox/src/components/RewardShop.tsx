@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Reward, Progress, ThemeStyle } from '../types';
 
@@ -42,28 +41,43 @@ const RewardItem: React.FC<{
 const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, themeStyles }) => {
   
   const checkLimit = (reward: Reward): boolean => {
+    // If there's no limit type or count defined, the reward is not limited.
     if (reward.limit.type === 'none' || !reward.limit.count) return false;
-    
+
     const purchases = progress.purchasedRewards[reward.id] || [];
-    if (purchases.length === 0) return false;
-    
+    // Optimization: if the total number of purchases is less than the limit, it can't be reached yet.
+    if (purchases.length < reward.limit.count) return false;
+
     const now = new Date();
+    // Normalize 'now' to the start of the current day in the local timezone for accurate comparisons.
+    now.setHours(0, 0, 0, 0);
+
     const relevantPurchases = purchases.filter(pDate => {
-      const purchaseDate = new Date(pDate);
-      if (reward.limit.type === 'daily') {
-        return purchaseDate.toDateString() === now.toDateString();
+      // The pDate is a 'YYYY-MM-DD' string. new Date(pDate) can be unreliable due to timezones (parses as UTC).
+      // To ensure correct local time comparison, we parse the string manually.
+      const [year, month, day] = pDate.split('-').map(Number);
+      // This creates a date at midnight in the user's local timezone.
+      const purchaseDate = new Date(year, month - 1, day);
+
+      switch (reward.limit.type) {
+        case 'daily':
+          // Check if the purchase was made on the same day as today.
+          return purchaseDate.getTime() === now.getTime();
+        case 'weekly': {
+          const weekStart = new Date(now);
+          // Set to the beginning of the current week (Sunday).
+          weekStart.setDate(now.getDate() - now.getDay());
+          return purchaseDate.getTime() >= weekStart.getTime();
+        }
+        case 'monthly':
+          // Check if the purchase was made in the same month and year as today.
+          return purchaseDate.getMonth() === now.getMonth() && purchaseDate.getFullYear() === now.getFullYear();
+        default:
+          return false;
       }
-      if (reward.limit.type === 'weekly') {
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
-        return purchaseDate >= weekStart;
-      }
-      if (reward.limit.type === 'monthly') {
-        return purchaseDate.getMonth() === now.getMonth() && purchaseDate.getFullYear() === now.getFullYear();
-      }
-      return false;
     });
-    
+
+    // The limit is reached if the number of purchases within the relevant period is equal to or exceeds the count.
     return relevantPurchases.length >= reward.limit.count;
   };
 

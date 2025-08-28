@@ -1,7 +1,6 @@
-
 import Ajv from 'ajv';
 import { AllProgress, Progress, Profile } from '../types';
-import progressSchema from '../../schemas/progress.schema.json' assert { type: 'json' };
+import progressSchema from '../../schemas/progress.schema.json';
 
 const ajv = new Ajv();
 const validate = ajv.compile(progressSchema);

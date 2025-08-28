@@ -14,12 +14,12 @@ import { loadProgress, saveProgress, resetAllProgress } from './lib/storage';
 import { usePinVerification } from './lib/pin';
 
 // Import config data
-import tasksData from '../config/tasks.json' assert { type: 'json' };
-import rewardsData from '../config/rewards.json' assert { type: 'json' };
-import profilesData from '../config/profiles.json' assert { type: 'json' };
-import themesData from '../config/themes.json' assert { type: 'json' };
-import seasonsData from '../config/seasons.json' assert { type: 'json' };
-import xpPolicyData from '../config/xpPolicy.json' assert { type: 'json' };
+import tasksData from '../config/tasks.json';
+import rewardsData from '../config/rewards.json';
+import profilesData from '../config/profiles.json';
+import themesData from '../config/themes.json';
+import seasonsData from '../config/seasons.json';
+import xpPolicyData from '../config/xpPolicy.json';
 
 // Import components and libs
 import HUD from './components/HUD';
