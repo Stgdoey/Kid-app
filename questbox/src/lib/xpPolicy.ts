@@ -1,4 +1,3 @@
-
 import { Progress, Task, XPPolicy } from '../types';
 import { getTodayDateString } from './utils';
 
@@ -24,28 +23,40 @@ export function calculateLevel(xp: number, xpPerLevel: number) {
 export function processTaskCompletion(
   task: Task,
   currentProgress: Progress,
-  xpPolicy: XPPolicy
+  xpPolicy: XPPolicy,
+  allTasks: Task[]
 ): Progress {
   const today = getTodayDateString();
-  const todaysCompletions = currentProgress.dailyCompletions[today] || [];
+  const todaysCompletionsIds = currentProgress.dailyCompletions[today] || [];
 
-  // 1. Calculate base XP, applying diminishing returns if applicable
-  let earnedXp = task.xp;
-  if (todaysCompletions.length >= xpPolicy.diminishingReturns.afterTaskCount) {
-    earnedXp = Math.round(earnedXp * xpPolicy.diminishingReturns.reductionFactor);
+  // --- Refined Daily XP Cap Logic ---
+
+  // 1. Calculate total XP already earned today by re-evaluating each completed task.
+  // This ensures diminishing returns are correctly factored into the daily total.
+  let currentDailyXp = 0;
+  todaysCompletionsIds.forEach((completedTaskId, index) => {
+    const completedTask = allTasks.find(t => t.id === completedTaskId);
+    if (completedTask) {
+      let xpForThisTask = completedTask.xp;
+      // Apply diminishing returns based on when the task was completed (its index in the array)
+      if (index >= xpPolicy.diminishingReturns.afterTaskCount) {
+        xpForThisTask = Math.round(xpForThisTask * xpPolicy.diminishingReturns.reductionFactor);
+      }
+      currentDailyXp += xpForThisTask;
+    }
+  });
+
+  // 2. Calculate XP for the *new* task, applying diminishing returns.
+  let earnedXpForNewTask = task.xp;
+  if (todaysCompletionsIds.length >= xpPolicy.diminishingReturns.afterTaskCount) {
+    earnedXpForNewTask = Math.round(earnedXpForNewTask * xpPolicy.diminishingReturns.reductionFactor);
   }
-  
-  // 2. Check against daily XP cap
-  const currentDailyXp = todaysCompletions.reduce((total, taskId) => {
-    // This is a simplification; a more accurate system would store earned XP per task.
-    // For now, we assume we don't need to re-calculate past XP.
-    return total;
-  }, 0);
-  
-  const cappedXp = Math.min(earnedXp, xpPolicy.dailyXpCap - currentDailyXp);
-  if(cappedXp <= 0) return currentProgress; // No change if cap is reached
 
-  // 3. Update streak
+  // 3. Determine the final XP to be awarded, respecting the daily cap.
+  const remainingXpRoom = xpPolicy.dailyXpCap - currentDailyXp;
+  const cappedXp = Math.max(0, Math.min(earnedXpForNewTask, remainingXpRoom));
+
+  // 4. Update streak logic. This happens regardless of XP earned.
   let newStreak = currentProgress.streak;
   const lastDate = currentProgress.lastCompletionDate;
   if (lastDate !== today) {
@@ -54,31 +65,30 @@ export function processTaskCompletion(
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
     if (lastDate === yesterdayStr) {
-      newStreak += 1; // It's a new day and yesterday had a completion
+      newStreak += 1; // Continued streak
     } else {
       newStreak = 1; // Streak was broken, start a new one
     }
   }
   
-  // Apply streak bonus
+  // Apply streak bonus if it's the first task of a bonus day.
+  // Assumed that bonus XP is exempt from the daily cap.
+  let bonusXp = 0;
   if (newStreak > 0 && newStreak % xpPolicy.streakBonus.days === 0) {
-     // Apply bonus on the *first* task of the bonus day
-     if(todaysCompletions.length === 0){
-        // This is a simple bonus XP, not a multiplier on this task's XP
-        currentProgress.xp += xpPolicy.streakBonus.days * 10;
+     if(todaysCompletionsIds.length === 0){
+        bonusXp = xpPolicy.streakBonus.days * 10; // Simple bonus for reaching streak milestone
      }
   }
 
-
-  // 4. Create new progress object
+  // 5. Create the new progress object. The task completion is always recorded, even if 0 XP is awarded.
   const newProgress: Progress = {
     ...currentProgress,
-    xp: currentProgress.xp + cappedXp,
+    xp: currentProgress.xp + cappedXp + bonusXp,
     streak: newStreak,
     lastCompletionDate: today,
     dailyCompletions: {
       ...currentProgress.dailyCompletions,
-      [today]: [...todaysCompletions, task.id],
+      [today]: [...todaysCompletionsIds, task.id],
     },
   };
 

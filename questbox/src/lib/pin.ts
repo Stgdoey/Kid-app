@@ -71,9 +71,11 @@ export const PinModal: React.FC<PinVerificationProps> = ({ isVisible, onClose, o
 export function usePinVerification(correctPin: string) {
   const [isPinModalVisible, setPinModalVisible] = useState(false);
   const [actionToConfirm, setActionToConfirm] = useState<(() => void) | null>(null);
+  const [actionOnClose, setActionOnClose] = useState<(() => void) | null>(null);
 
-  const requestPin = useCallback((action: () => void) => {
+  const requestPin = useCallback((action: () => void, onCancel?: () => void) => {
     setActionToConfirm(() => action);
+    setActionOnClose(() => onCancel);
     setPinModalVisible(true);
   }, []);
 
@@ -83,11 +85,16 @@ export function usePinVerification(correctPin: string) {
     }
     setPinModalVisible(false);
     setActionToConfirm(null);
+    setActionOnClose(null);
   };
 
   const handlePinClose = () => {
+    if (actionOnClose) {
+      actionOnClose();
+    }
     setPinModalVisible(false);
     setActionToConfirm(null);
+    setActionOnClose(null);
   };
   
   const PinVerificationComponent = () => (

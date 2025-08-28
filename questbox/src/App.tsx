@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Task,
@@ -31,11 +32,12 @@ import Leaderboard from './components/Leaderboard';
 import ProfileSelector from './components/ProfileSelector';
 import { processTaskCompletion } from './lib/xpPolicy';
 import { generateQuest } from './lib/aiQuestGenerator';
+import { generateReward } from './lib/aiRewardGenerator';
 
 const App: React.FC = () => {
   // Config state now includes tasks that can be updated with AI quests
   const [tasks, setTasks] = useState<Task[]>(tasksData);
-  const [rewards] = useState<Reward[]>(rewardsData);
+  const [rewards, setRewards] = useState<Reward[]>(rewardsData);
   const [profiles] = useState<Profile[]>(profilesData);
   const [themes] = useState<ThemesConfig>(themesData);
   const [seasons] = useState<SeasonsConfig>(seasonsData);
@@ -52,6 +54,8 @@ const App: React.FC = () => {
   // AI-related state
   const [isGeneratingQuest, setIsGeneratingQuest] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isGeneratingReward, setIsGeneratingReward] = useState(false);
+  const [aiRewardError, setAiRewardError] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -80,14 +84,18 @@ const App: React.FC = () => {
   const handleTaskComplete = useCallback((task: Task) => {
     if (!allProgress || !activeProfile) return;
     const currentProgress = allProgress[activeProfile.id];
-    const newProgress = processTaskCompletion(task, currentProgress, xpPolicy);
+    // Pass the full tasks list to accurately calculate daily XP cap
+    const newProgress = processTaskCompletion(task, currentProgress, xpPolicy, tasks);
     updateProgress(newProgress);
-  }, [allProgress, activeProfile, xpPolicy, updateProgress]);
+  }, [allProgress, activeProfile, xpPolicy, tasks, updateProgress]);
 
-  const handleRewardPurchase = useCallback((reward: Reward) => {
+  const handleRewardPurchase = useCallback((reward: Reward, onCancel: () => void, onSuccess: () => void) => {
     if (!allProgress || !activeProfile) return;
     const currentProgress = allProgress[activeProfile.id];
-    if (currentProgress.xp < reward.cost) return;
+    if (currentProgress.xp < reward.cost) {
+      onCancel(); // Not enough XP, cancel any pending state
+      return;
+    }
 
     const purchaseAction = () => {
         const today = new Date().toISOString().split('T')[0];
@@ -100,10 +108,11 @@ const App: React.FC = () => {
           },
         };
         updateProgress(newProgress);
+        onSuccess();
     }
     
     if (reward.needsApproval) {
-        requestPin(purchaseAction);
+        requestPin(purchaseAction, onCancel);
     } else {
         purchaseAction();
     }
@@ -145,6 +154,29 @@ const App: React.FC = () => {
         }
     } finally {
         setIsGeneratingQuest(false);
+    }
+  }, []);
+
+  const handleGenerateReward = useCallback(async () => {
+    setIsGeneratingReward(true);
+    setAiRewardError(null);
+    try {
+        const newRewardData = await generateReward();
+        const newReward: Reward = {
+            ...newRewardData,
+            id: `ai_${Date.now()}`, // Create a unique ID
+            needsApproval: false, // Default to not needing approval
+        };
+        // Add the new reward to the top of the list
+        setRewards(prevRewards => [newReward, ...prevRewards]);
+    } catch (error) {
+        if (error instanceof Error) {
+            setAiRewardError(error.message);
+        } else {
+            setAiRewardError("An unknown error occurred while generating a reward.");
+        }
+    } finally {
+        setIsGeneratingReward(false);
     }
   }, []);
 
@@ -220,6 +252,9 @@ const App: React.FC = () => {
                   rewards={rewards}
                   progress={currentProgress}
                   onPurchase={handleRewardPurchase}
+                  onGenerateReward={handleGenerateReward}
+                  isGeneratingReward={isGeneratingReward}
+                  aiError={aiRewardError}
                   themeStyles={themeStyles}
                 />
             </div>

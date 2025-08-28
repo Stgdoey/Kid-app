@@ -1,3 +1,5 @@
+
+
 import Ajv from 'ajv';
 import { AllProgress, Progress, Profile } from '../types';
 import progressSchema from '../../schemas/progress.schema.json';

@@ -5,17 +5,6 @@ import { Task } from '../types';
 // This type is for the raw AI response before we format it into a Task
 type GeneratedTaskData = Omit<Task, 'id'>;
 
-// As per requirements, the API key is sourced from the environment variables.
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  // This will prevent the app from running without the API key,
-  // making it clear that it's a required configuration.
-  throw new Error("API_KEY environment variable not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 // Define the expected JSON structure for the AI's response.
 const responseSchema = {
     type: Type.OBJECT,
@@ -45,6 +34,17 @@ const responseSchema = {
  * It requests a single, creative task and expects a JSON response matching the defined schema.
  */
 export async function generateQuest(): Promise<GeneratedTaskData> {
+  // As per requirements, the API key is sourced from the environment variables.
+  const API_KEY = process.env.API_KEY;
+
+  if (!API_KEY) {
+    // This will prevent the app from running without the API key,
+    // making it clear that it's a required configuration.
+    throw new Error("API_KEY environment variable not set. The app can't contact the AI service.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   try {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
