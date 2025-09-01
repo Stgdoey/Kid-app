@@ -34,14 +34,14 @@ const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeS
         <button
           onClick={handleExport}
           style={secondaryProps.style}
-          className={`w-full px-4 py-2 rounded-lg font-semibold transition-colors ${secondaryProps.className} hover:bg-opacity-80`}
+          className={`w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${secondaryProps.className} hover:bg-opacity-80 hover:scale-105`}
         >
           Export My Data
         </button>
         {/* <button className="w-full px-4 py-2 bg-slate-600 rounded-lg font-semibold hover:bg-slate-500 transition-colors">Import Data</button> */}
         <button
           onClick={onResetProgress}
-          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors"
+          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-500 transition-all duration-200 hover:scale-105"
         >
           Reset My Progress
         </button>

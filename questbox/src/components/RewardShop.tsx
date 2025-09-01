@@ -7,6 +7,7 @@ interface RewardShopProps {
   progress: Progress;
   onPurchase: (reward: Reward, onCancel: () => void, onSuccess: () => void) => void;
   onGenerateReward: () => void;
+  onOpenRewardCreator: () => void;
   isGeneratingReward: boolean;
   aiError: string | null;
   themeStyles: ThemeStyle;
@@ -89,7 +90,7 @@ const RewardItem: React.FC<{
   );
 }
 
-const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, onGenerateReward, isGeneratingReward, aiError, themeStyles }) => {
+const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, onGenerateReward, onOpenRewardCreator, isGeneratingReward, aiError, themeStyles }) => {
   const [pendingApprovalRewardId, setPendingApprovalRewardId] = useState<string | null>(null);
   const [confirmedPurchaseId, setConfirmedPurchaseId] = useState<string | null>(null);
   
@@ -162,38 +163,51 @@ const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, 
     <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
       <h2 className="text-xl font-bold mb-3">Reward Shop</h2>
       
-      {/* AI Reward Generator Button */}
       <div className="mb-4">
-        <button
-          onClick={onGenerateReward}
-          disabled={isGeneratingReward}
-          style={accentProps.style}
-          className={`w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
-            isGeneratingReward
-              ? 'bg-slate-600 cursor-wait'
-              : `${accentProps.className} hover:opacity-90`
-          }`}
-          aria-live="polite"
-        >
-          {isGeneratingReward ? (
-             <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Conjuring a Reward...
-             </>
-          ) : (
-             <>
+        <div className="flex flex-col sm:flex-row gap-2">
+            <button
+            onClick={onGenerateReward}
+            disabled={isGeneratingReward}
+            style={accentProps.style}
+            className={`w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
+                isGeneratingReward
+                ? 'bg-slate-600 cursor-wait'
+                : `${accentProps.className} hover:opacity-90 hover:scale-105 transform`
+            }`}
+            aria-live="polite"
+            >
+            {isGeneratingReward ? (
+                <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Conjuring...
+                </>
+            ) : (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                    </svg>
+                    Generate with AI
+                </>
+            )}
+            </button>
+            <button
+            onClick={onOpenRewardCreator}
+            disabled={isGeneratingReward}
+            className="w-full sm:w-auto px-4 py-3 rounded-lg font-semibold bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2"
+            aria-label="Create a new custom reward"
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                Generate a New Reward
-             </>
-          )}
-        </button>
-        {aiError && <p className="text-red-400 text-sm text-center mt-2" role="alert">{aiError}</p>}
+                <span className="sm:hidden">Create Custom Reward</span>
+            </button>
+        </div>
+        {aiError && <div className="bg-red-900/50 border border-red-800 text-red-300 text-sm rounded-lg p-3 mt-2 text-center" role="alert">{aiError}</div>}
       </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {rewards.map(reward => (

@@ -4,6 +4,9 @@ export interface Task {
   description: string;
   xp: number;
   repeatable: 'daily' | 'weekly' | 'none';
+  difficulty?: 'easy' | 'medium' | 'hard';
+  timer?: number; // Duration in minutes
+  xpPenaltyFactor?: number; // e.g., 0.5 for 50% penalty
 }
 
 export interface Reward {
@@ -24,6 +27,13 @@ export interface Profile {
   pin: string;
 }
 
+export interface CompletionRecord {
+  taskId: string;
+  taskName: string;
+  completionDate: string;
+  xpEarned: number;
+}
+
 export interface Progress {
   xp: number;
   streak: number;
@@ -31,6 +41,8 @@ export interface Progress {
   dailyCompletions: { [date: string]: string[] }; // date string -> array of task ids
   purchasedRewards: { [rewardId: string]: string[] }; // reward id -> array of purchase date strings
   streakSavers: number;
+  completionHistory: CompletionRecord[];
+  activeTimers?: { [taskId: string]: string }; // taskId -> start time ISO string
 }
 
 export interface AllProgress {
@@ -77,4 +89,5 @@ export interface XPPolicy {
         afterTaskCount: number;
         reductionFactor: number;
     };
+    noStreakReductionFactor?: number;
 }

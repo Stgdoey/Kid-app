@@ -1,4 +1,3 @@
-
 {
   "xpPerLevel": 500,
   "dailyXpCap": 200,
@@ -7,7 +6,8 @@
     "multiplier": 1.5
   },
   "diminishingReturns": {
-    "afterTaskCount": 5,
-    "reductionFactor": 0.5
-  }
+    "afterTaskCount": 3,
+    "reductionFactor": 0.4
+  },
+  "noStreakReductionFactor": 0.8
 }

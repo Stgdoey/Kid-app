@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { ThemesConfig, SeasonsConfig, Theme } from '../types';
 import { getActiveSeasonTheme } from '../lib/seasonsLoader';
@@ -59,8 +60,9 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
                 onChange={(e) => setManualTheme(e.target.value)}
                 className="bg-slate-700 text-white text-sm rounded-md p-1 border-transparent focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             >
-                {Object.entries(themes).map(([key, theme]) => (
-                    <option key={key} value={key}>{(theme as Theme).name}</option>
+                {/* FIX: Replaced Object.entries with Object.keys to avoid type inference issues where the theme object was being treated as 'unknown'. */}
+                {Object.keys(themes).map((key) => (
+                    <option key={key} value={key}>{(themes[key] as Theme).name}</option>
                 ))}
             </select>
             <button

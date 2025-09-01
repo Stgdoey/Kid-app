@@ -27,7 +27,29 @@
             }
           }
         },
-        "streakSavers": { "type": "integer" }
+        "streakSavers": { "type": "integer" },
+        "activeTimers": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_]+$": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "completionHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "taskId": { "type": "string" },
+              "taskName": { "type": "string" },
+              "completionDate": { "type": "string" },
+              "xpEarned": { "type": "integer" }
+            },
+            "required": ["taskId", "taskName", "completionDate", "xpEarned"]
+          }
+        }
       },
       "required": [
         "xp",
@@ -35,7 +57,8 @@
         "lastCompletionDate",
         "dailyCompletions",
         "purchasedRewards",
-        "streakSavers"
+        "streakSavers",
+        "completionHistory"
       ]
     }
   }

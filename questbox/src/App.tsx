@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Task,
@@ -15,12 +16,12 @@ import { usePinVerification } from './lib/pin';
 
 // --- Inlined Config Data to fix loading issues ---
 const tasksData: Task[] = [
-  { "id": "brush_teeth_am", "name": "Brush Your Teeth (Morning)", "description": "Keep those pearly whites shining!", "xp": 10, "repeatable": "daily" },
-  { "id": "make_bed", "name": "Make Your Bed", "description": "A tidy room starts with a tidy bed.", "xp": 15, "repeatable": "daily" },
-  { "id": "read_book", "name": "Read for 20 Minutes", "description": "Explore a new world in a book.", "xp": 30, "repeatable": "daily" },
-  { "id": "homework", "name": "Finish Homework", "description": "Get all your schoolwork done.", "xp": 50, "repeatable": "daily" },
-  { "id": "clean_room", "name": "Clean Your Room", "description": "Put away toys and clothes.", "xp": 75, "repeatable": "weekly" },
-  { "id": "help_dishes", "name": "Help with Dishes", "description": "Help clear the table or load the dishwasher.", "xp": 25, "repeatable": "daily" }
+  { "id": "brush_teeth_am", "name": "Brush Your Teeth (Morning)", "description": "Keep those pearly whites shining!", "xp": 10, "repeatable": "daily", "difficulty": "easy" },
+  { "id": "make_bed", "name": "Make Your Bed", "description": "A tidy room starts with a tidy bed.", "xp": 15, "repeatable": "daily", "difficulty": "easy" },
+  { "id": "read_book", "name": "Read for 20 Minutes", "description": "Explore a new world in a book.", "xp": 30, "repeatable": "daily", "difficulty": "medium" },
+  { "id": "homework", "name": "Finish Homework", "description": "Get all your schoolwork done.", "xp": 50, "repeatable": "daily", "difficulty": "medium", "timer": 45, "xpPenaltyFactor": 0.5 },
+  { "id": "clean_room", "name": "Clean Your Room", "description": "Put away toys and clothes.", "xp": 75, "repeatable": "weekly", "difficulty": "hard" },
+  { "id": "help_dishes", "name": "Help with Dishes", "description": "Help clear the table or load the dishwasher.", "xp": 25, "repeatable": "daily", "difficulty": "easy" }
 ];
 
 const rewardsData: Reward[] = [
@@ -72,10 +73,14 @@ import TaskList from './components/TaskList';
 import RewardShop from './components/RewardShop';
 import ThemePicker from './components/ThemePicker';
 import CustomThemeCreator from './components/CustomThemeCreator';
+import CustomRewardCreator from './components/CustomRewardCreator';
+import TaskEditorModal from './components/TaskEditorModal';
 import DataPanel from './components/DataPanel';
 import Leaderboard from './components/Leaderboard';
 import ProfileSelector from './components/ProfileSelector';
-import { processTaskCompletion } from './lib/xpPolicy';
+import LevelUpModal from './components/LevelUpModal';
+import TaskHistory from './components/TaskHistory';
+import { processTaskCompletion, calculateLevel } from './lib/xpPolicy';
 import { generateQuest } from './lib/aiQuestGenerator';
 import { generateReward } from './lib/aiRewardGenerator';
 
@@ -110,6 +115,10 @@ const App: React.FC = () => {
   // UI State
   const [activeThemeKey, setActiveThemeKey] = useState<string>('default_light');
   const [isThemeCreatorOpen, setIsThemeCreatorOpen] = useState(false);
+  const [isRewardCreatorOpen, setIsRewardCreatorOpen] = useState(false);
+  const [lastXpGain, setLastXpGain] = useState<{ amount: number; key: number } | null>(null);
+  const [levelUpInfo, setLevelUpInfo] = useState<{ newLevel: number } | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   
   // AI-related state
   const [isGeneratingQuest, setIsGeneratingQuest] = useState(false);
@@ -126,6 +135,14 @@ const App: React.FC = () => {
       setValidationError("There was an error loading your data. It might be corrupted.");
     }
   }, [profiles]);
+
+  // Clear the lastXpGain after its animation finishes
+  useEffect(() => {
+    if (lastXpGain) {
+        const timer = setTimeout(() => setLastXpGain(null), 1500);
+        return () => clearTimeout(timer);
+    }
+  }, [lastXpGain]);
 
   const { requestPin, PinVerificationComponent } = usePinVerification(activeProfile?.pin || "0000");
 
@@ -144,10 +161,40 @@ const App: React.FC = () => {
   const handleTaskComplete = useCallback((task: Task) => {
     if (!allProgress || !activeProfile) return;
     const currentProgress = allProgress[activeProfile.id];
-    // Pass the full tasks list to accurately calculate daily XP cap
+    const { level: oldLevel } = calculateLevel(currentProgress.xp, xpPolicy.xpPerLevel);
+
     const newProgress = processTaskCompletion(task, currentProgress, xpPolicy, tasks);
+    
+    const xpGained = newProgress.xp - currentProgress.xp;
+    if (xpGained > 0) {
+      setLastXpGain({ amount: xpGained, key: Date.now() });
+    }
+    
+    const { level: newLevel } = calculateLevel(newProgress.xp, xpPolicy.xpPerLevel);
+    if (newLevel > oldLevel) {
+        // Delay level up modal to let the XP bar animation catch up
+        setTimeout(() => {
+            setLevelUpInfo({ newLevel });
+        }, 600);
+    }
+
     updateProgress(newProgress);
   }, [allProgress, activeProfile, xpPolicy, tasks, updateProgress]);
+
+  const handleStartTimer = useCallback((taskId: string) => {
+    if (!allProgress || !activeProfile) return;
+    const currentProgress = allProgress[activeProfile.id];
+    
+    const newProgress = {
+        ...currentProgress,
+        activeTimers: {
+            ...(currentProgress.activeTimers || {}),
+            [taskId]: new Date().toISOString(),
+        }
+    };
+    updateProgress(newProgress);
+  }, [allProgress, activeProfile, updateProgress]);
+
 
   const handleRewardPurchase = useCallback((reward: Reward, onCancel: () => void, onSuccess: () => void) => {
     if (!allProgress || !activeProfile) return;
@@ -190,6 +237,8 @@ const App: React.FC = () => {
             lastCompletionDate: null,
             dailyCompletions: {},
             purchasedRewards: {},
+            completionHistory: [],
+            activeTimers: {},
         };
        updateProgress(newProgress);
     });
@@ -216,6 +265,21 @@ const App: React.FC = () => {
         setIsGeneratingQuest(false);
     }
   }, []);
+  
+  const handleOpenTaskEditor = (task: Task) => {
+    requestPin(() => {
+        setEditingTask(task);
+    });
+  };
+
+  const handleSaveTask = (updatedTask: Task) => {
+    setTasks(currentTasks => 
+        currentTasks.map(task => 
+            task.id === updatedTask.id ? updatedTask : task
+        )
+    );
+    setEditingTask(null); // Close the modal
+  };
 
   const handleGenerateReward = useCallback(async () => {
     setIsGeneratingReward(true);
@@ -246,16 +310,27 @@ const App: React.FC = () => {
     
     setThemes(prevThemes => {
         const updatedThemes = { ...prevThemes, ...newTheme };
+        // FIX: The type of `customThemesToSave` was being inferred incorrectly, causing a type error.
+        // A type assertion is added to ensure TypeScript understands the object conforms to the ThemesConfig type.
         const customThemesToSave = Object.fromEntries(
             Object.entries(updatedThemes).filter(([k]) => k.startsWith('custom_'))
         );
-        saveCustomThemes(customThemesToSave);
+        saveCustomThemes(customThemesToSave as ThemesConfig);
         return updatedThemes;
     });
     
     setActiveThemeKey(key);
     setIsThemeCreatorOpen(false);
   };
+
+  const handleSaveCustomReward = useCallback((newRewardData: Omit<Reward, 'id'>) => {
+    const rewardToSave: Reward = {
+        id: `custom_${Date.now()}`, // Create a unique ID
+        ...newRewardData,
+    };
+    setRewards(currentRewards => [rewardToSave, ...currentRewards]);
+    setIsRewardCreatorOpen(false); // Close modal on save
+  }, []);
 
   const handleSelectProfile = (profile: Profile) => {
     setActiveProfile(profile);
@@ -303,11 +378,27 @@ const App: React.FC = () => {
       className={`min-h-screen font-sans transition-colors duration-500 ${bgProps.className} ${textProps.className}`}
     >
       <PinVerificationComponent />
+      {levelUpInfo && (
+          <LevelUpModal newLevel={levelUpInfo.newLevel} onClose={() => setLevelUpInfo(null)} />
+      )}
        {isThemeCreatorOpen && (
         <CustomThemeCreator
             onClose={() => setIsThemeCreatorOpen(false)}
             onSave={handleSaveCustomTheme}
             existingThemeNames={Object.values(themes).map(t => t.name)}
+        />
+      )}
+      {isRewardCreatorOpen && (
+        <CustomRewardCreator
+            onClose={() => setIsRewardCreatorOpen(false)}
+            onSave={handleSaveCustomReward}
+        />
+      )}
+      {editingTask && (
+        <TaskEditorModal
+            task={editingTask}
+            onClose={() => setEditingTask(null)}
+            onSave={handleSaveTask}
         />
       )}
       <div className="container mx-auto p-4 max-w-7xl">
@@ -325,11 +416,11 @@ const App: React.FC = () => {
                     onOpenThemeCreator={() => setIsThemeCreatorOpen(true)}
                 />
              </div>
-             <button onClick={handleSwitchUser} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm font-semibold">Switch User</button>
+             <button onClick={handleSwitchUser} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm font-semibold transition-transform duration-200 hover:scale-105">Switch User</button>
           </div>
         </header>
 
-        <HUD progress={currentProgress} xpPolicy={xpPolicy} rewards={rewards} />
+        <HUD progress={currentProgress} xpPolicy={xpPolicy} rewards={rewards} lastXpGain={lastXpGain} />
         
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="flex flex-col gap-6 lg:col-span-2">
@@ -338,7 +429,9 @@ const App: React.FC = () => {
                   allTasks={tasks}
                   progress={currentProgress}
                   onComplete={handleTaskComplete}
+                  onStartTimer={handleStartTimer}
                   onGenerateQuest={handleGenerateQuest}
+                  onEditQuest={handleOpenTaskEditor}
                   isGeneratingQuest={isGeneratingQuest}
                   aiError={aiError}
                   themeStyles={themeStyles}
@@ -348,6 +441,7 @@ const App: React.FC = () => {
                   progress={currentProgress}
                   onPurchase={handleRewardPurchase}
                   onGenerateReward={handleGenerateReward}
+                  onOpenRewardCreator={() => setIsRewardCreatorOpen(true)}
                   isGeneratingReward={isGeneratingReward}
                   aiError={aiRewardError}
                   themeStyles={themeStyles}
@@ -359,12 +453,16 @@ const App: React.FC = () => {
               themeStyles={themeStyles}
             />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 flex flex-col gap-6">
              <Leaderboard
                 allProgress={allProgress}
                 profiles={profiles}
                 xpPolicy={xpPolicy}
                 activeProfileId={activeProfile.id}
+                themeStyles={themeStyles}
+              />
+              <TaskHistory
+                history={currentProgress.completionHistory || []}
                 themeStyles={themeStyles}
               />
           </div>

@@ -5,7 +5,8 @@
     "lastCompletionDate": null,
     "dailyCompletions": {},
     "purchasedRewards": {},
-    "streakSavers": 0
+    "streakSavers": 0,
+    "completionHistory": []
   },
   "alex02": {
     "xp": 0,
@@ -13,6 +14,7 @@
     "lastCompletionDate": null,
     "dailyCompletions": {},
     "purchasedRewards": {},
-    "streakSavers": 0
+    "streakSavers": 0,
+    "completionHistory": []
   }
 }

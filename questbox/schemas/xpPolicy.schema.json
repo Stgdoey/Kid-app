@@ -21,6 +21,11 @@
         "reductionFactor": { "type": "number", "minimum": 0, "maximum": 1 }
       },
       "required": ["afterTaskCount", "reductionFactor"]
+    },
+    "noStreakReductionFactor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
     }
   },
   "required": ["xpPerLevel", "dailyXpCap"]

@@ -1,7 +1,9 @@
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import { AllProgress, Profile, ThemesConfig } from '../types';
 
 const ajv = new Ajv();
+addFormats(ajv);
 
 // Inlined schema to prevent JSON module loading issues
 const progressSchema = {
@@ -33,7 +35,26 @@ const progressSchema = {
             }
           }
         },
-        "streakSavers": { "type": "integer" }
+        "streakSavers": { "type": "integer" },
+        "activeTimers": {
+            "type": "object",
+            "patternProperties": {
+                "^[a-zA-Z0-9_]+$": { "type": "string" }
+            }
+        },
+        "completionHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "taskId": { "type": "string" },
+              "taskName": { "type": "string" },
+              "completionDate": { "type": "string" },
+              "xpEarned": { "type": "integer" }
+            },
+            "required": ["taskId", "taskName", "completionDate", "xpEarned"]
+          }
+        }
       },
       "required": [
         "xp",
@@ -41,7 +62,8 @@ const progressSchema = {
         "lastCompletionDate",
         "dailyCompletions",
         "purchasedRewards",
-        "streakSavers"
+        "streakSavers",
+        "completionHistory"
       ]
     }
   }
@@ -64,7 +86,9 @@ const createInitialProgressForProfiles = (profiles: Profile[]): AllProgress => {
       lastCompletionDate: null,
       dailyCompletions: {},
       purchasedRewards: {},
-      streakSavers: 0
+      streakSavers: 0,
+      completionHistory: [],
+      activeTimers: {},
     };
   });
   return progress;
@@ -87,6 +111,13 @@ export function loadProgress(profiles: Profile[]): AllProgress {
       profiles.forEach(p => {
         if (!parsedData[p.id]) {
           parsedData[p.id] = initialProgress[p.id];
+        }
+        // Backwards compatibility: add new fields if they're missing
+        if (!parsedData[p.id].completionHistory) {
+            parsedData[p.id].completionHistory = [];
+        }
+        if (!parsedData[p.id].activeTimers) {
+            parsedData[p.id].activeTimers = {};
         }
       });
       return parsedData as AllProgress;

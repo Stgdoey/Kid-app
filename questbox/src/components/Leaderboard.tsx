@@ -34,7 +34,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ allProgress, profiles, xpPoli
   }).sort((a, b) => b.xp - a.xp);
 
   return (
-    <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4 h-full`}>
+    <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
       <h2 className="text-xl font-bold mb-4 text-center">Leaderboard</h2>
       <div className="space-y-2">
         {leaderboardData.map((player, index) => {

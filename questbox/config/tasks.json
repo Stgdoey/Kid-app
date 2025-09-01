@@ -5,41 +5,49 @@
     "name": "Brush Your Teeth (Morning)",
     "description": "Keep those pearly whites shining!",
     "xp": 10,
-    "repeatable": "daily"
+    "repeatable": "daily",
+    "difficulty": "easy"
   },
   {
     "id": "make_bed",
     "name": "Make Your Bed",
     "description": "A tidy room starts with a tidy bed.",
     "xp": 15,
-    "repeatable": "daily"
+    "repeatable": "daily",
+    "difficulty": "easy"
   },
   {
     "id": "read_book",
     "name": "Read for 20 Minutes",
     "description": "Explore a new world in a book.",
     "xp": 30,
-    "repeatable": "daily"
+    "repeatable": "daily",
+    "difficulty": "medium"
   },
   {
     "id": "homework",
     "name": "Finish Homework",
     "description": "Get all your schoolwork done.",
     "xp": 50,
-    "repeatable": "daily"
+    "repeatable": "daily",
+    "difficulty": "medium",
+    "timer": 45,
+    "xpPenaltyFactor": 0.5
   },
   {
     "id": "clean_room",
     "name": "Clean Your Room",
     "description": "Put away toys and clothes.",
     "xp": 75,
-    "repeatable": "weekly"
+    "repeatable": "weekly",
+    "difficulty": "hard"
   },
   {
     "id": "help_dishes",
     "name": "Help with Dishes",
     "description": "Help clear the table or load the dishwasher.",
     "xp": 25,
-    "repeatable": "daily"
+    "repeatable": "daily",
+    "difficulty": "easy"
   }
 ]

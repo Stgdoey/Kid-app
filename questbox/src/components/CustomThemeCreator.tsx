@@ -86,6 +86,29 @@ const CustomThemeCreator: React.FC<CustomThemeCreatorProps> = ({ onClose, onSave
                   className="w-full bg-slate-700 border border-slate-600 rounded-md p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
               />
             </div>
+            
+            {/* Live Preview Section */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Live Preview</label>
+              <div
+                style={{ backgroundColor: styles.bg, color: styles.text }}
+                className="rounded-lg p-4 border border-slate-600 transition-colors"
+                aria-hidden="true" // This is a visual-only representation
+              >
+                <div style={{ backgroundColor: styles.primary }} className="rounded-md p-3 shadow-inner">
+                  <h3 className="font-bold text-lg mb-2">Card Title</h3>
+                  <div style={{ backgroundColor: styles.secondary }} className="rounded p-2 text-sm">
+                    <p>A secondary element.</p>
+                  </div>
+                  <button
+                    style={{ backgroundColor: styles.accent }}
+                    className="w-full mt-3 px-3 py-1.5 rounded font-semibold text-white" // Using white text for best contrast
+                  >
+                    Accent Button
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <ColorInput label="Background" value={styles.bg} onChange={handleStyleChange('bg')} />
             <ColorInput label="Primary" value={styles.primary} onChange={handleStyleChange('primary')} />
@@ -99,13 +122,13 @@ const CustomThemeCreator: React.FC<CustomThemeCreatorProps> = ({ onClose, onSave
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="w-full px-4 py-3 rounded-lg font-semibold bg-slate-600 hover:bg-slate-500 transition-colors"
+            className="w-full px-4 py-3 rounded-lg font-semibold bg-slate-600 hover:bg-slate-500 transition-all duration-200 hover:scale-105"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="w-full px-4 py-3 rounded-lg font-semibold text-white bg-sky-500 hover:bg-sky-400 transition-colors"
+            className="w-full px-4 py-3 rounded-lg font-semibold text-white bg-sky-500 hover:bg-sky-400 transition-all duration-200 hover:scale-105"
           >
             Save Theme
           </button>
