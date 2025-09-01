@@ -1,8 +1,47 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task, Progress, ThemeStyle } from '../types';
 import { getAvailableQuests, getCompletedTodayQuests } from '../lib/questGenerator';
 import QuestInfoModal from './QuestInfoModal';
 import { getStyleAndClasses } from '../App';
+
+// --- Web Audio API for Sound Effects ---
+// Create a single audio context to be reused.
+const audioContext = typeof window !== 'undefined' ? new (window.AudioContext || (window as any).webkitAudioContext)() : null;
+
+/**
+ * Plays a sound effect for starting or ending a timer.
+ * @param type - 'start' for a higher-pitched, short sound; 'end' for a lower-pitched, alert sound.
+ */
+const playSound = (type: 'start' | 'end') => {
+  if (!audioContext || audioContext.state === 'suspended') {
+    audioContext?.resume();
+  }
+  if (!audioContext) return;
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // Set volume to 30%
+
+  if (type === 'start') {
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.4);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.4);
+  } else { // 'end'
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(330, audioContext.currentTime); // E4 note
+    oscillator.frequency.setValueAtTime(220, audioContext.currentTime + 0.1); // A3 note
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.5);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  }
+};
+
 
 interface TaskListProps {
   allTasks: Task[];
@@ -34,6 +73,8 @@ const TaskItem: React.FC<{
     themeStyles: ThemeStyle 
 }> = ({ task, onComplete, onViewInfo, onStartTimer, completed, progress, themeStyles }) => {
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
+  const [progressPercent, setProgressPercent] = useState(100);
+  const [alarmPlayed, setAlarmPlayed] = useState(false);
   const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
   const bgProps = getStyleAndClasses(themeStyles.bg, 'bg');
 
@@ -42,15 +83,36 @@ const TaskItem: React.FC<{
   const isTimerActive = isTimed && !!timerStartTime;
 
   useEffect(() => {
+      // Reset alarm status when timer becomes active
+      if (isTimerActive) {
+          setAlarmPlayed(false);
+      }
+  }, [isTimerActive]);
+
+  useEffect(() => {
     let interval: number | undefined;
     if (isTimerActive && timerStartTime) {
+        const durationMillis = task.timer! * 60 * 1000;
+
         const calculateRemaining = () => {
             const startTime = new Date(timerStartTime).getTime();
-            const durationMillis = task.timer! * 60 * 1000;
             const endTime = startTime + durationMillis;
             const now = Date.now();
             const remainingMillis = Math.max(0, endTime - now);
+            
             setRemainingTime(formatTime(remainingMillis / 1000));
+            setProgressPercent((remainingMillis / durationMillis) * 100);
+
+            if (remainingMillis === 0) {
+                setAlarmPlayed(prev => {
+                    if (!prev) {
+                        playSound('end');
+                        return true;
+                    }
+                    return prev;
+                });
+                clearInterval(interval);
+            }
         }
         calculateRemaining();
         interval = setInterval(calculateRemaining, 1000);
@@ -73,10 +135,43 @@ const TaskItem: React.FC<{
     }
   }
 
+  const getProgressBarColor = (percentage: number) => {
+    if (percentage < 20) return 'bg-red-500';
+    if (percentage < 50) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+  
+  const getDueDateInfo = (dueDate: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [year, month, day] = dueDate.split('-').map(Number);
+    const localDue = new Date(year, month - 1, day);
+    localDue.setHours(0,0,0,0);
+
+    const isOverdue = localDue < today;
+    const diffTime = localDue.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let text = `Due: ${localDue.toLocaleDateString()}`;
+    if (diffDays === 0) text = 'Due Today';
+    if (diffDays === 1) text = 'Due Tomorrow';
+    if (isOverdue) text = 'Overdue';
+    
+    return {
+        isOverdue,
+        text,
+        textColor: isOverdue ? 'text-red-400' : 'text-slate-400'
+    };
+  };
+
+  const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate) : null;
+  const MAX_VISUAL_XP = 100; // Ceiling for the visual XP bar
+  const xpPercent = Math.min((task.xp / MAX_VISUAL_XP) * 100, 100);
+
   return (
     <div 
       style={secondaryProps.style}
-      className={`p-4 rounded-lg flex items-center gap-4 transition-all ${completed ? `${secondaryProps.className} opacity-60` : `${secondaryProps.className} hover:scale-[1.02] cursor-pointer`}`}
+      className={`relative p-4 rounded-lg flex items-center gap-4 transition-all overflow-hidden ${completed ? `${secondaryProps.className} opacity-60` : `${secondaryProps.className} hover:scale-[1.02] cursor-pointer`}`}
       onClick={() => onViewInfo(task)}
       role="button"
       tabIndex={0}
@@ -106,6 +201,7 @@ const TaskItem: React.FC<{
             <button
                 onClick={(e) => {
                     e.stopPropagation();
+                    playSound('start');
                     onStartTimer(task.id);
                 }}
                 disabled={completed}
@@ -121,20 +217,48 @@ const TaskItem: React.FC<{
 
       <div className="flex-grow overflow-hidden">
         <h3 className={`font-bold truncate ${completed ? 'line-through' : ''}`}>{task.name}</h3>
-        <div className="flex items-center gap-2">
-            <div className={`text-xs font-semibold px-2 py-0.5 rounded-full ${getRepeatableColor(task.repeatable)}`}>
+        <div className="flex items-center gap-2 text-xs mt-1">
+            <div className={`font-semibold px-2 py-0.5 rounded-full ${getRepeatableColor(task.repeatable)}`}>
                 {repeatableText[task.repeatable]}
             </div>
-            <p className="text-sm text-slate-400 truncate">{task.description}</p>
+            {dueDateInfo && (
+                <div className={`flex items-center gap-1 font-semibold ${dueDateInfo.textColor}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    <span>{dueDateInfo.text}</span>
+                </div>
+            )}
         </div>
+        <p className="text-sm text-slate-400 truncate mt-1">{task.description}</p>
       </div>
       <div className={`font-bold text-lg text-center ${completed ? 'opacity-50' : ''}`}>
         {isTimerActive ? (
-             <div className={`text-lg font-mono ${remainingTime === '00:00:00' ? 'text-red-400 animate-pulse' : 'text-amber-400'}`}>{remainingTime}</div>
+             <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-400 animate-pulse-timer" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <div className={`text-lg font-mono ${progressPercent === 0 ? 'text-red-400' : 'text-amber-400'}`}>{remainingTime}</div>
+             </div>
         ) : (
-             <div className="text-amber-400">{task.xp} XP</div>
+             <div className="text-amber-400 w-20 text-center">
+                 <div>{task.xp} XP</div>
+                 <div className="w-full bg-slate-700/50 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div className="bg-amber-400 h-full rounded-full" style={{ width: `${xpPercent}%`}}></div>
+                 </div>
+             </div>
         )}
       </div>
+      {isTimerActive && !completed && (
+          <div className="absolute bottom-0 left-0 w-full h-1.5 bg-slate-900/50">
+              <div
+                className={`h-full rounded-br-lg transition-all duration-1000 linear ${getProgressBarColor(progressPercent)}`}
+                style={{ width: `${progressPercent}%`}}
+                role="progressbar"
+                aria-valuenow={progressPercent}
+              ></div>
+          </div>
+      )}
     </div>
   );
 };

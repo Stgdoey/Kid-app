@@ -1,3 +1,4 @@
+
 export interface Task {
   id: string;
   name: string;
@@ -7,6 +8,7 @@ export interface Task {
   difficulty?: 'easy' | 'medium' | 'hard';
   timer?: number; // Duration in minutes
   xpPenaltyFactor?: number; // e.g., 0.5 for 50% penalty
+  dueDate?: string; // YYYY-MM-DD format
 }
 
 export interface Reward {

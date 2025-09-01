@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
 
@@ -12,6 +13,7 @@ const TaskEditorModal: React.FC<TaskEditorModalProps> = ({ task, onClose, onSave
   const [description, setDescription] = useState('');
   const [xp, setXp] = useState<string>('');
   const [difficulty, setDifficulty] = useState<Task['difficulty']>('easy');
+  const [dueDate, setDueDate] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -20,6 +22,7 @@ const TaskEditorModal: React.FC<TaskEditorModalProps> = ({ task, onClose, onSave
       setDescription(task.description);
       setXp(String(task.xp));
       setDifficulty(task.difficulty || 'easy');
+      setDueDate(task.dueDate || '');
     }
   }, [task]);
 
@@ -42,6 +45,7 @@ const TaskEditorModal: React.FC<TaskEditorModalProps> = ({ task, onClose, onSave
       description: description.trim(),
       xp: parsedXp,
       difficulty: difficulty,
+      dueDate: dueDate || undefined,
     };
 
     onSave(updatedTask);
@@ -87,18 +91,32 @@ const TaskEditorModal: React.FC<TaskEditorModalProps> = ({ task, onClose, onSave
               className="w-full bg-slate-700 border border-slate-600 rounded-md p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
             />
           </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+                <label htmlFor="taskXp" className="block text-sm font-medium text-slate-300 mb-1">XP Reward</label>
+                <input
+                id="taskXp"
+                type="number"
+                value={xp}
+                onChange={(e) => setXp(e.target.value)}
+                min="0"
+                className="w-full bg-slate-700 border border-slate-600 rounded-md p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+            </div>
 
-          <div>
-            <label htmlFor="taskXp" className="block text-sm font-medium text-slate-300 mb-1">XP Reward</label>
-            <input
-              id="taskXp"
-              type="number"
-              value={xp}
-              onChange={(e) => setXp(e.target.value)}
-              min="0"
-              className="w-full bg-slate-700 border border-slate-600 rounded-md p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-            />
+            <div>
+                <label htmlFor="taskDueDate" className="block text-sm font-medium text-slate-300 mb-1">Due Date (Optional)</label>
+                <input
+                id="taskDueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full bg-slate-700 border border-slate-600 rounded-md p-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                />
+            </div>
           </div>
+
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Difficulty</label>

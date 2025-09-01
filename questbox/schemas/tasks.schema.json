@@ -13,7 +13,8 @@
       "repeatable": { "type": "string", "enum": ["daily", "weekly", "none"] },
       "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
       "timer": { "type": "integer", "minimum": 0, "description": "Duration in minutes for timed quests." },
-      "xpPenaltyFactor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Multiplier for XP if timer runs out (e.g., 0.5 for 50% penalty)." }
+      "xpPenaltyFactor": { "type": "number", "minimum": 0, "maximum": 1, "description": "Multiplier for XP if timer runs out (e.g., 0.5 for 50% penalty)." },
+      "dueDate": { "type": "string", "format": "date", "description": "Optional due date for the task in YYYY-MM-DD format." }
     },
     "required": ["id", "name", "description", "xp", "repeatable"]
   }

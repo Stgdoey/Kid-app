@@ -86,3 +86,19 @@ body {
   clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   animation: sparkle 1s ease-out forwards;
 }
+
+/* Timer Pulse Animation */
+@keyframes pulse-timer {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-timer {
+  animation: pulse-timer 2s infinite ease-in-out;
+}
