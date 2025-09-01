@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Task, Progress, ThemeStyle } from '../types';
 import { getAvailableQuests, getCompletedTodayQuests } from '../lib/questGenerator';
 import QuestInfoModal from './QuestInfoModal';
+import { getStyleAndClasses } from '../App';
 
 interface TaskListProps {
   allTasks: Task[];
@@ -13,40 +14,50 @@ interface TaskListProps {
   themeStyles: ThemeStyle;
 }
 
-const TaskItem: React.FC<{ task: Task, onComplete: () => void, onViewInfo: () => void, completed: boolean, themeStyles: ThemeStyle }> = ({ task, onComplete, onViewInfo, completed, themeStyles }) => (
-  <div 
-    className={`p-4 rounded-lg flex items-center gap-4 transition-all ${completed ? `${themeStyles.secondary} opacity-60` : `${themeStyles.secondary} hover:scale-[1.02] cursor-pointer`}`}
-    onClick={onViewInfo}
-    role="button"
-    tabIndex={0}
-    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewInfo(); }}}
-    aria-label={`View details for ${task.name}`}
-  >
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onComplete();
-      }}
-      disabled={completed}
-      className={`w-8 h-8 rounded-full border-2 flex-shrink-0 transition-colors ${completed ? 'bg-green-500 border-green-400' : `${themeStyles.bg} border-slate-500 hover:border-green-400`}`}
-      aria-label={completed ? `Task ${task.name} completed` : `Complete task: ${task.name}`}
+const TaskItem: React.FC<{ task: Task, onComplete: () => void, onViewInfo: () => void, completed: boolean, themeStyles: ThemeStyle }> = ({ task, onComplete, onViewInfo, completed, themeStyles }) => {
+  const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
+  const bgProps = getStyleAndClasses(themeStyles.bg, 'bg');
+
+  return (
+    <div 
+      style={secondaryProps.style}
+      className={`p-4 rounded-lg flex items-center gap-4 transition-all ${completed ? `${secondaryProps.className} opacity-60` : `${secondaryProps.className} hover:scale-[1.02] cursor-pointer`}`}
+      onClick={onViewInfo}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewInfo(); }}}
+      aria-label={`View details for ${task.name}`}
     >
-      {completed && <span className="text-white font-bold">✓</span>}
-    </button>
-    <div className="flex-grow overflow-hidden">
-      <h3 className={`font-bold truncate ${completed ? 'line-through' : ''}`}>{task.name}</h3>
-      <p className="text-sm text-slate-400 truncate">{task.description}</p>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onComplete();
+        }}
+        disabled={completed}
+        style={bgProps.style}
+        className={`w-8 h-8 rounded-full border-2 flex-shrink-0 transition-colors ${completed ? 'bg-green-500 border-green-400' : `${bgProps.className} border-slate-500 hover:border-green-400`}`}
+        aria-label={completed ? `Task ${task.name} completed` : `Complete task: ${task.name}`}
+      >
+        {completed && <span className="text-white font-bold">✓</span>}
+      </button>
+      <div className="flex-grow overflow-hidden">
+        <h3 className={`font-bold truncate ${completed ? 'line-through' : ''}`}>{task.name}</h3>
+        <p className="text-sm text-slate-400 truncate">{task.description}</p>
+      </div>
+      <div className={`font-bold text-lg text-amber-400 ${completed ? 'opacity-50' : ''}`}>
+        {task.xp} XP
+      </div>
     </div>
-    <div className={`font-bold text-lg text-amber-400 ${completed ? 'opacity-50' : ''}`}>
-      {task.xp} XP
-    </div>
-  </div>
-);
+  );
+};
 
 const TaskList: React.FC<TaskListProps> = ({ allTasks, progress, onComplete, onGenerateQuest, isGeneratingQuest, aiError, themeStyles }) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const availableQuests = getAvailableQuests(allTasks, progress);
   const completedQuests = getCompletedTodayQuests(allTasks, progress);
+  
+  const primaryProps = getStyleAndClasses(themeStyles.primary, 'bg');
+  const accentProps = getStyleAndClasses(themeStyles.accent, 'accent');
 
   return (
     <>
@@ -55,7 +66,7 @@ const TaskList: React.FC<TaskListProps> = ({ allTasks, progress, onComplete, onG
         onClose={() => setSelectedTask(null)}
         themeStyles={themeStyles}
       />
-      <div className={`${themeStyles.primary} rounded-xl shadow-lg p-4`}>
+      <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
         <h2 className="text-xl font-bold mb-3">Today's Quests</h2>
         
         {/* AI Quest Generator Button */}
@@ -63,10 +74,11 @@ const TaskList: React.FC<TaskListProps> = ({ allTasks, progress, onComplete, onG
           <button
             onClick={onGenerateQuest}
             disabled={isGeneratingQuest}
+            style={accentProps.style}
             className={`w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
               isGeneratingQuest
                 ? 'bg-slate-600 cursor-wait'
-                : `${themeStyles.accent} hover:opacity-90`
+                : `${accentProps.className} hover:opacity-90`
             }`}
             aria-live="polite"
           >

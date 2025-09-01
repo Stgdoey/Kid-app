@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { Reward, Progress, ThemeStyle } from '../types';
+import { getStyleAndClasses } from '../App';
 
 interface RewardShopProps {
   rewards: Reward[];
@@ -22,6 +22,8 @@ const RewardItem: React.FC<{
   themeStyles: ThemeStyle
 }> = ({ reward, onPurchase, canAfford, isLimited, isPending, isConfirmed, themeStyles }) => {
   const isDisabled = !canAfford || isLimited;
+  const accentProps = getStyleAndClasses(themeStyles.accent, 'accent');
+  const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
   
   const getButtonState = () => {
     if (isConfirmed) {
@@ -33,6 +35,7 @@ const RewardItem: React.FC<{
             </>
         ),
         className: 'bg-green-500 text-white',
+        style: {},
         disabled: true,
       };
     }
@@ -45,6 +48,7 @@ const RewardItem: React.FC<{
                 </>
             ),
             className: 'bg-amber-500 text-white cursor-wait',
+            style: {},
             disabled: true,
         };
     }
@@ -52,12 +56,14 @@ const RewardItem: React.FC<{
         return {
             content: <>{isLimited ? 'Limit Reached' : `${reward.cost} XP`}</>,
             className: 'bg-slate-600 text-slate-400 cursor-not-allowed',
+            style: {},
             disabled: true,
         };
     }
     return {
         content: <>{reward.cost} XP</>,
-        className: `${themeStyles.accent} text-white hover:opacity-90`,
+        className: `${accentProps.className} text-white hover:opacity-90`,
+        style: accentProps.style,
         disabled: false,
     };
   };
@@ -65,7 +71,7 @@ const RewardItem: React.FC<{
   const buttonState = getButtonState();
 
   return (
-    <div className={`${themeStyles.secondary} p-4 rounded-lg flex flex-col justify-between`}>
+    <div style={secondaryProps.style} className={`${secondaryProps.className} p-4 rounded-lg flex flex-col justify-between`}>
       <div>
         <h3 className="font-bold">{reward.name}</h3>
         {reward.description && <p className="text-sm text-slate-400 mt-1">{reward.description}</p>}
@@ -74,6 +80,7 @@ const RewardItem: React.FC<{
       <button
         onClick={onPurchase}
         disabled={buttonState.disabled}
+        style={buttonState.style}
         className={`w-full mt-4 px-4 py-2 rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 ${buttonState.className}`}
       >
         {buttonState.content}
@@ -86,6 +93,9 @@ const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, 
   const [pendingApprovalRewardId, setPendingApprovalRewardId] = useState<string | null>(null);
   const [confirmedPurchaseId, setConfirmedPurchaseId] = useState<string | null>(null);
   
+  const primaryProps = getStyleAndClasses(themeStyles.primary, 'bg');
+  const accentProps = getStyleAndClasses(themeStyles.accent, 'accent');
+
   const handlePurchaseClick = (reward: Reward) => {
     // Prevent multiple clicks while a confirmation is showing
     if (confirmedPurchaseId) return;
@@ -149,7 +159,7 @@ const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, 
   };
 
   return (
-    <div className={`${themeStyles.primary} rounded-xl shadow-lg p-4`}>
+    <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
       <h2 className="text-xl font-bold mb-3">Reward Shop</h2>
       
       {/* AI Reward Generator Button */}
@@ -157,10 +167,11 @@ const RewardShop: React.FC<RewardShopProps> = ({ rewards, progress, onPurchase, 
         <button
           onClick={onGenerateReward}
           disabled={isGeneratingReward}
+          style={accentProps.style}
           className={`w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
             isGeneratingReward
               ? 'bg-slate-600 cursor-wait'
-              : `${themeStyles.accent} hover:opacity-90`
+              : `${accentProps.className} hover:opacity-90`
           }`}
           aria-live="polite"
         >

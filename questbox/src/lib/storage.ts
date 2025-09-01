@@ -1,13 +1,58 @@
-
-
 import Ajv from 'ajv';
-import { AllProgress, Progress, Profile } from '../types';
-import progressSchema from '../../schemas/progress.schema.json';
+import { AllProgress, Profile, ThemesConfig } from '../types';
 
 const ajv = new Ajv();
+
+// Inlined schema to prevent JSON module loading issues
+const progressSchema = {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QuestBox All Progress Schema",
+  "type": "object",
+  "patternProperties": {
+    "^[a-zA-Z0-9_]+$": {
+      "type": "object",
+      "properties": {
+        "xp": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "lastCompletionDate": { "type": ["string", "null"] },
+        "dailyCompletions": {
+          "type": "object",
+          "patternProperties": {
+            "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "purchasedRewards": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_]+$": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "streakSavers": { "type": "integer" }
+      },
+      "required": [
+        "xp",
+        "streak",
+        "lastCompletionDate",
+        "dailyCompletions",
+        "purchasedRewards",
+        "streakSavers"
+      ]
+    }
+  }
+};
+
+
 const validate = ajv.compile(progressSchema);
 
-const STORAGE_KEY = 'questbox_progress';
+const PROGRESS_STORAGE_KEY = 'questbox_progress';
+const CUSTOM_THEMES_STORAGE_KEY = 'questbox_custom_themes';
+
 
 // Helper to generate a valid empty progress structure for a new profile
 const createInitialProgressForProfiles = (profiles: Profile[]): AllProgress => {
@@ -27,7 +72,7 @@ const createInitialProgressForProfiles = (profiles: Profile[]): AllProgress => {
 
 export function loadProgress(profiles: Profile[]): AllProgress {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(PROGRESS_STORAGE_KEY);
     const initialProgress = createInitialProgressForProfiles(profiles);
 
     if (!data) {
@@ -58,7 +103,7 @@ export function loadProgress(profiles: Profile[]): AllProgress {
 export function saveProgress(allProgress: AllProgress): void {
   try {
     if (validate(allProgress)) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(allProgress));
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(allProgress));
     } else {
       console.error('Attempted to save invalid progress data.', validate.errors);
     }
@@ -69,6 +114,28 @@ export function saveProgress(allProgress: AllProgress): void {
 
 
 export function resetAllProgress(profiles: Profile[]): AllProgress {
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(PROGRESS_STORAGE_KEY);
   return createInitialProgressForProfiles(profiles);
+}
+
+// --- Custom Theme Storage ---
+
+export function loadCustomThemes(): ThemesConfig {
+    try {
+        const data = localStorage.getItem(CUSTOM_THEMES_STORAGE_KEY);
+        if (!data) return {};
+        // Add basic validation if needed
+        return JSON.parse(data);
+    } catch (error) {
+        console.error("Failed to load custom themes.", error);
+        return {};
+    }
+}
+
+export function saveCustomThemes(themes: ThemesConfig): void {
+    try {
+        localStorage.setItem(CUSTOM_THEMES_STORAGE_KEY, JSON.stringify(themes));
+    } catch (error) {
+        console.error("Failed to save custom themes.", error);
+    }
 }

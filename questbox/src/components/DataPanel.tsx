@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Progress, ThemeStyle } from '../types';
+import { getStyleAndClasses } from '../App';
 
 interface DataPanelProps {
   onResetProgress: () => void;
@@ -9,6 +9,8 @@ interface DataPanelProps {
 }
 
 const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeStyles }) => {
+  const primaryProps = getStyleAndClasses(themeStyles.primary, 'bg');
+  const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
 
   const handleExport = () => {
     const dataStr = JSON.stringify({ progress }, null, 2);
@@ -26,12 +28,13 @@ const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeS
   // A real implementation would use a file input and robust parsing/validation.
 
   return (
-    <div className={`${themeStyles.primary} rounded-xl shadow-lg p-4`}>
+    <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
       <h2 className="text-xl font-bold mb-3">Admin Panel</h2>
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleExport}
-          className={`w-full px-4 py-2 rounded-lg font-semibold transition-colors ${themeStyles.secondary} hover:bg-opacity-80`}
+          style={secondaryProps.style}
+          className={`w-full px-4 py-2 rounded-lg font-semibold transition-colors ${secondaryProps.className} hover:bg-opacity-80`}
         >
           Export My Data
         </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { ThemesConfig, SeasonsConfig, Theme } from '../types';
 import { getActiveSeasonTheme } from '../lib/seasonsLoader';
@@ -7,11 +6,12 @@ interface ThemePickerProps {
   themes: ThemesConfig;
   seasons: SeasonsConfig;
   onThemeChange: (themeKey: string) => void;
+  onOpenThemeCreator: () => void;
 }
 
 type ThemeMode = 'manual' | 'auto' | 'seasonal';
 
-const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChange }) => {
+const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChange, onOpenThemeCreator }) => {
   const [mode, setMode] = useState<ThemeMode>('seasonal');
   const [manualTheme, setManualTheme] = useState<string>('default_light');
   
@@ -53,6 +53,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
             <option value="manual">Manual</option>
         </select>
         {mode === 'manual' && (
+           <>
             <select
                 value={manualTheme}
                 onChange={(e) => setManualTheme(e.target.value)}
@@ -62,6 +63,14 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
                     <option key={key} value={key}>{(theme as Theme).name}</option>
                 ))}
             </select>
+            <button
+                onClick={onOpenThemeCreator}
+                className="text-sm bg-slate-600 hover:bg-slate-500 rounded-md px-2 py-1"
+                aria-label="Create new custom theme"
+            >
+                Create...
+            </button>
+           </>
         )}
     </div>
   );

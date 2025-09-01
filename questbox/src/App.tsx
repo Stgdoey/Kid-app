@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Task,
@@ -10,23 +8,70 @@ import {
   SeasonsConfig,
   XPPolicy as IXPPolicy,
   AllProgress,
+  ThemeStyle,
 } from './types';
-import { loadProgress, saveProgress, resetAllProgress } from './lib/storage';
+import { loadProgress, saveProgress, resetAllProgress, loadCustomThemes, saveCustomThemes } from './lib/storage';
 import { usePinVerification } from './lib/pin';
 
-// Import config data
-import tasksData from '../config/tasks.json';
-import rewardsData from '../config/rewards.json';
-import profilesData from '../config/profiles.json';
-import themesData from '../config/themes.json';
-import seasonsData from '../config/seasons.json';
-import xpPolicyData from '../config/xpPolicy.json';
+// --- Inlined Config Data to fix loading issues ---
+const tasksData: Task[] = [
+  { "id": "brush_teeth_am", "name": "Brush Your Teeth (Morning)", "description": "Keep those pearly whites shining!", "xp": 10, "repeatable": "daily" },
+  { "id": "make_bed", "name": "Make Your Bed", "description": "A tidy room starts with a tidy bed.", "xp": 15, "repeatable": "daily" },
+  { "id": "read_book", "name": "Read for 20 Minutes", "description": "Explore a new world in a book.", "xp": 30, "repeatable": "daily" },
+  { "id": "homework", "name": "Finish Homework", "description": "Get all your schoolwork done.", "xp": 50, "repeatable": "daily" },
+  { "id": "clean_room", "name": "Clean Your Room", "description": "Put away toys and clothes.", "xp": 75, "repeatable": "weekly" },
+  { "id": "help_dishes", "name": "Help with Dishes", "description": "Help clear the table or load the dishwasher.", "xp": 25, "repeatable": "daily" }
+];
+
+const rewardsData: Reward[] = [
+  { "id": "screen_time_30", "name": "30 Mins Screen Time", "description": "Extra time for games or videos.", "cost": 100, "limit": { "type": "daily", "count": 2 }, "needsApproval": true },
+  { "id": "ice_cream", "name": "Ice Cream Treat", "description": "A yummy bowl of your favorite ice cream.", "cost": 150, "limit": { "type": "weekly", "count": 2 }, "needsApproval": true },
+  { "id": "new_book", "name": "Choose a New Book", "description": "Pick out a new book to read.", "cost": 400, "limit": { "type": "monthly", "count": 1 }, "needsApproval": false },
+  { "id": "movie_night", "name": "Family Movie Night", "description": "You get to pick the movie!", "cost": 500, "limit": { "type": "weekly", "count": 1 }, "needsApproval": false },
+  { "id": "stay_up_late", "name": "Stay Up 30 Mins Late", "description": "A little extra time before bed.", "cost": 250, "limit": { "type": "weekly", "count": 1 }, "needsApproval": true }
+];
+
+const profilesData: Profile[] = [
+  { "id": "kairi01", "name": "Kairi", "pin": "1234" },
+  { "id": "alex02", "name": "Alex", "pin": "5678" }
+];
+
+const themesData: ThemesConfig = {
+  "default_light": { "name": "Default Light", "styles": { "bg": "bg-slate-100", "primary": "bg-white", "secondary": "bg-slate-200", "accent": "bg-blue-500", "text": "text-slate-800" } },
+  "default_dark": { "name": "Default Dark", "styles": { "bg": "bg-slate-900", "primary": "bg-slate-800", "secondary": "bg-slate-700", "accent": "bg-sky-500", "text": "text-slate-100" } },
+  "forest": { "name": "Forest Adventure", "styles": { "bg": "bg-emerald-900", "primary": "bg-emerald-800", "secondary": "bg-emerald-700", "accent": "bg-amber-400", "text": "text-stone-100" } },
+  "ocean": { "name": "Ocean Depths", "styles": { "bg": "bg-blue-900", "primary": "bg-blue-800", "secondary": "bg-blue-700", "accent": "bg-cyan-300", "text": "text-slate-100" } },
+  "space": { "name": "Cosmic Voyager", "styles": { "bg": "bg-indigo-950", "primary": "bg-indigo-900", "secondary": "bg-slate-800", "accent": "bg-fuchsia-500", "text": "text-slate-200" } },
+  "autumn": { "name": "Autumn", "styles": { "bg": "bg-orange-950", "primary": "bg-orange-900", "secondary": "bg-amber-800", "accent": "bg-yellow-400", "text": "text-orange-100" } },
+  "winter": { "name": "Winter", "styles": { "bg": "bg-slate-700", "primary": "bg-slate-600", "secondary": "bg-sky-900", "accent": "bg-cyan-400", "text": "text-white" } },
+  "spring": { "name": "Spring", "styles": { "bg": "bg-green-100", "primary": "bg-green-200", "secondary": "bg-pink-200", "accent": "bg-pink-400", "text": "text-green-900" } },
+  "summer": { "name": "Summer", "styles": { "bg": "bg-yellow-100", "primary": "bg-yellow-200", "secondary": "bg-sky-300", "accent": "bg-orange-500", "text": "text-gray-800" } }
+};
+
+const seasonsData: SeasonsConfig = {
+  "seasons": [
+    { "name": "Spring", "theme": "spring", "startDate": "2024-03-20", "endDate": "2024-06-20" },
+    { "name": "Summer", "theme": "summer", "startDate": "2024-06-21", "endDate": "2024-09-22" },
+    { "name": "Autumn", "theme": "autumn", "startDate": "2024-09-23", "endDate": "2024-12-20" },
+    { "name": "Winter", "theme": "winter", "startDate": "2024-12-21", "endDate": "2025-03-19" }
+  ],
+  "fallbackTheme": "default_light"
+};
+
+const xpPolicyData: IXPPolicy = {
+  "xpPerLevel": 500,
+  "dailyXpCap": 200,
+  "streakBonus": { "days": 3, "multiplier": 1.5 },
+  "diminishingReturns": { "afterTaskCount": 5, "reductionFactor": 0.5 }
+};
+// --- End Inlined Config Data ---
 
 // Import components and libs
 import HUD from './components/HUD';
 import TaskList from './components/TaskList';
 import RewardShop from './components/RewardShop';
 import ThemePicker from './components/ThemePicker';
+import CustomThemeCreator from './components/CustomThemeCreator';
 import DataPanel from './components/DataPanel';
 import Leaderboard from './components/Leaderboard';
 import ProfileSelector from './components/ProfileSelector';
@@ -34,12 +79,26 @@ import { processTaskCompletion } from './lib/xpPolicy';
 import { generateQuest } from './lib/aiQuestGenerator';
 import { generateReward } from './lib/aiRewardGenerator';
 
+// Helper to apply theme styles, supporting both Tailwind classes and hex colors
+export const getStyleAndClasses = (value: string | undefined, property: 'bg' | 'text' | 'accent' = 'bg') => {
+  if (!value) return { style: {}, className: '' };
+  if (value.startsWith('#') || value.startsWith('rgb')) {
+    const styleProp = property === 'text' ? 'color' : 'backgroundColor';
+    return { style: { [styleProp]: value }, className: '' };
+  }
+  return { style: {}, className: value };
+};
+
+
 const App: React.FC = () => {
   // Config state now includes tasks that can be updated with AI quests
   const [tasks, setTasks] = useState<Task[]>(tasksData);
   const [rewards, setRewards] = useState<Reward[]>(rewardsData);
   const [profiles] = useState<Profile[]>(profilesData);
-  const [themes] = useState<ThemesConfig>(themesData);
+  const [themes, setThemes] = useState<ThemesConfig>(() => {
+      const customThemes = loadCustomThemes();
+      return { ...themesData, ...customThemes };
+  });
   const [seasons] = useState<SeasonsConfig>(seasonsData);
   const [xpPolicy] = useState<IXPPolicy>(xpPolicyData);
 
@@ -50,6 +109,7 @@ const App: React.FC = () => {
 
   // UI State
   const [activeThemeKey, setActiveThemeKey] = useState<string>('default_light');
+  const [isThemeCreatorOpen, setIsThemeCreatorOpen] = useState(false);
   
   // AI-related state
   const [isGeneratingQuest, setIsGeneratingQuest] = useState(false);
@@ -180,6 +240,23 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const handleSaveCustomTheme = (name: string, styles: ThemeStyle) => {
+    const key = `custom_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+    const newTheme = { [key]: { name, styles } };
+    
+    setThemes(prevThemes => {
+        const updatedThemes = { ...prevThemes, ...newTheme };
+        const customThemesToSave = Object.fromEntries(
+            Object.entries(updatedThemes).filter(([k]) => k.startsWith('custom_'))
+        );
+        saveCustomThemes(customThemesToSave);
+        return updatedThemes;
+    });
+    
+    setActiveThemeKey(key);
+    setIsThemeCreatorOpen(false);
+  };
+
   const handleSelectProfile = (profile: Profile) => {
     setActiveProfile(profile);
   };
@@ -189,6 +266,9 @@ const App: React.FC = () => {
   };
 
   const themeStyles = themes[activeThemeKey]?.styles || themes.default_light.styles;
+  const bgProps = getStyleAndClasses(themeStyles.bg, 'bg');
+  const textProps = getStyleAndClasses(themeStyles.text, 'text');
+
 
   if (!allProgress) {
     return (
@@ -218,8 +298,18 @@ const App: React.FC = () => {
   const currentProgress = allProgress[activeProfile.id];
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-500 ${themeStyles.bg} ${themeStyles.text}`}>
+    <div
+      style={{ ...bgProps.style, ...textProps.style }}
+      className={`min-h-screen font-sans transition-colors duration-500 ${bgProps.className} ${textProps.className}`}
+    >
       <PinVerificationComponent />
+       {isThemeCreatorOpen && (
+        <CustomThemeCreator
+            onClose={() => setIsThemeCreatorOpen(false)}
+            onSave={handleSaveCustomTheme}
+            existingThemeNames={Object.values(themes).map(t => t.name)}
+        />
+      )}
       <div className="container mx-auto p-4 max-w-7xl">
         {validationError && <div className="bg-red-500 text-white p-2 rounded-md mb-4">{validationError}</div>}
         
@@ -228,7 +318,12 @@ const App: React.FC = () => {
           <div className="text-right flex items-center gap-4">
              <div>
                 <div className="text-lg font-semibold">{activeProfile.name}'s Quests</div>
-                <ThemePicker themes={themes} seasons={seasons} onThemeChange={setActiveThemeKey} />
+                <ThemePicker
+                    themes={themes}
+                    seasons={seasons}
+                    onThemeChange={setActiveThemeKey}
+                    onOpenThemeCreator={() => setIsThemeCreatorOpen(true)}
+                />
              </div>
              <button onClick={handleSwitchUser} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm font-semibold">Switch User</button>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Task, ThemeStyle } from '../types';
+import { getStyleAndClasses } from '../App';
 
 interface QuestInfoModalProps {
   task: Task | null;
@@ -9,6 +10,10 @@ interface QuestInfoModalProps {
 
 const QuestInfoModal: React.FC<QuestInfoModalProps> = ({ task, onClose, themeStyles }) => {
   if (!task) return null;
+  
+  const primaryProps = getStyleAndClasses(themeStyles.primary, 'bg');
+  const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
+  const accentProps = getStyleAndClasses(themeStyles.accent, 'accent');
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -30,7 +35,8 @@ const QuestInfoModal: React.FC<QuestInfoModalProps> = ({ task, onClose, themeSty
       role="dialog"
     >
       <div 
-        className={`${themeStyles.primary} rounded-2xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in-up`}
+        style={primaryProps.style}
+        className={`${primaryProps.className} rounded-2xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in-up`}
         role="document"
       >
         <div className="flex justify-between items-start">
@@ -49,11 +55,11 @@ const QuestInfoModal: React.FC<QuestInfoModalProps> = ({ task, onClose, themeSty
         <p className="text-slate-400 mb-4">{task.description}</p>
         
         <div className="flex flex-wrap gap-4 mb-4">
-            <div className={`flex-1 ${themeStyles.secondary} rounded-lg p-3 text-center`}>
+            <div style={secondaryProps.style} className={`flex-1 ${secondaryProps.className} rounded-lg p-3 text-center`}>
                 <div className="font-bold text-2xl text-amber-400">{task.xp}</div>
                 <div className="text-xs text-slate-400">XP Reward</div>
             </div>
-            <div className={`flex-1 ${themeStyles.secondary} rounded-lg p-3 text-center`}>
+            <div style={secondaryProps.style} className={`flex-1 ${secondaryProps.className} rounded-lg p-3 text-center`}>
                 <div className="font-bold text-2xl text-sky-400">{repeatableText[task.repeatable]}</div>
                 <div className="text-xs text-slate-400">Frequency</div>
             </div>
@@ -61,7 +67,8 @@ const QuestInfoModal: React.FC<QuestInfoModalProps> = ({ task, onClose, themeSty
         
         <button
           onClick={onClose}
-          className={`w-full mt-4 px-4 py-3 rounded-lg font-semibold text-white transition-colors ${themeStyles.accent} hover:opacity-90`}
+          style={accentProps.style}
+          className={`w-full mt-4 px-4 py-3 rounded-lg font-semibold text-white transition-colors ${accentProps.className} hover:opacity-90`}
         >
           Got it!
         </button>
