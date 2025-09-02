@@ -1,17 +1,12 @@
 import React from 'react';
-import { Progress, ThemeStyle } from '../types';
-import { getStyleAndClasses } from '../App';
+import { Progress } from '../types';
 
 interface DataPanelProps {
   onResetProgress: () => void;
   progress: Progress;
-  themeStyles: ThemeStyle;
 }
 
-const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeStyles }) => {
-  const primaryProps = getStyleAndClasses(themeStyles.primary, 'bg');
-  const secondaryProps = getStyleAndClasses(themeStyles.secondary, 'bg');
-
+const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress }) => {
   const handleExport = () => {
     const dataStr = JSON.stringify({ progress }, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -28,13 +23,12 @@ const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeS
   // A real implementation would use a file input and robust parsing/validation.
 
   return (
-    <div style={primaryProps.style} className={`${primaryProps.className} rounded-xl shadow-lg p-4`}>
+    <div className="bg-primary/40 backdrop-blur-md border border-secondary/50 rounded-xl shadow-lg p-4">
       <h2 className="text-xl font-bold mb-3">Admin Panel</h2>
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={handleExport}
-          style={secondaryProps.style}
-          className={`w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${secondaryProps.className} hover:bg-opacity-80 hover:scale-105`}
+          className="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 bg-secondary/50 hover:bg-secondary/80 hover:scale-105"
         >
           Export My Data
         </button>
@@ -46,7 +40,7 @@ const DataPanel: React.FC<DataPanelProps> = ({ onResetProgress, progress, themeS
           Reset My Progress
         </button>
       </div>
-      <p className="text-xs text-slate-400 mt-3">Resetting your progress requires your PIN and cannot be undone.</p>
+      <p className="text-xs text-text-muted mt-3">Resetting your progress requires your PIN and cannot be undone.</p>
     </div>
   );
 };

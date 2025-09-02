@@ -1,4 +1,3 @@
-
 export interface Task {
   id: string;
   name: string;
@@ -36,6 +35,11 @@ export interface CompletionRecord {
   xpEarned: number;
 }
 
+export interface ActiveTimer {
+  startTime: string | null; // ISO string when running, null when paused
+  elapsedBeforePause: number; // Milliseconds accumulated while it was running
+}
+
 export interface Progress {
   xp: number;
   streak: number;
@@ -44,7 +48,7 @@ export interface Progress {
   purchasedRewards: { [rewardId: string]: string[] }; // reward id -> array of purchase date strings
   streakSavers: number;
   completionHistory: CompletionRecord[];
-  activeTimers?: { [taskId: string]: string }; // taskId -> start time ISO string
+  activeTimers?: { [taskId: string]: ActiveTimer };
 }
 
 export interface AllProgress {
@@ -52,11 +56,12 @@ export interface AllProgress {
 }
 
 export interface ThemeStyle {
-  bg: string;
+  background: string;
   primary: string;
   secondary: string;
   accent: string;
   text: string;
+  textMuted: string;
 }
 
 export interface Theme {

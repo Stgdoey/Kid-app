@@ -24,10 +24,14 @@ export function processTaskCompletion(
   task: Task,
   currentProgress: Progress,
   xpPolicy: XPPolicy,
+  // allTasks parameter is kept for signature compatibility but is no longer used for daily cap calculation.
   allTasks: Task[]
 ): Progress {
   const today = getTodayDateString();
   const todaysCompletionsIds = currentProgress.dailyCompletions[today] || [];
+  const todaysHistory = (currentProgress.completionHistory || []).filter(
+    record => record.completionDate === today
+  );
 
   // First, determine the streak for today. This is constant for all tasks completed today.
   let streakForToday = currentProgress.streak;
@@ -39,17 +43,23 @@ export function processTaskCompletion(
     streakForToday = (lastDate === yesterdayStr) ? currentProgress.streak + 1 : 1;
   }
   
-  // Helper to calculate modified XP for any task
-  const calculateModifiedXp = (taskToCalc: Task, completionIndex: number) => {
+  // Helper to calculate modified XP for the new task being completed.
+  const calculateXpForNewTask = (taskToCalc: Task) => {
       let xp = taskToCalc.xp;
+      const completionIndex = todaysCompletionsIds.length;
 
-      // Penalty for timed quests completed late
-      const activeTimerStart = currentProgress.activeTimers?.[taskToCalc.id];
-      if (taskToCalc.timer && activeTimerStart) {
-        const startTime = new Date(activeTimerStart).getTime();
-        const elapsedMinutes = (Date.now() - startTime) / (1000 * 60);
-        if (elapsedMinutes > taskToCalc.timer) {
-            xp = Math.round(xp * (taskToCalc.xpPenaltyFactor ?? 0.5)); // Apply penalty
+      // Penalty for timed quests completed late.
+      const activeTimer = currentProgress.activeTimers?.[taskToCalc.id];
+      if (taskToCalc.timer && activeTimer) {
+        const durationMillis = taskToCalc.timer * 60 * 1000;
+        let elapsedMillis = activeTimer.elapsedBeforePause;
+        if (activeTimer.startTime) {
+          elapsedMillis += Date.now() - new Date(activeTimer.startTime).getTime();
+        }
+
+        if (elapsedMillis > durationMillis) {
+            // Apply penalty if time is up
+            xp = Math.round(xp * (taskToCalc.xpPenaltyFactor ?? 0.5));
         }
       }
 
@@ -66,17 +76,12 @@ export function processTaskCompletion(
       return xp;
   };
 
-  // 1. Calculate total XP already earned today to check against the cap.
-  let currentDailyXp = 0;
-  todaysCompletionsIds.forEach((completedTaskId, index) => {
-    const completedTask = allTasks.find(t => t.id === completedTaskId);
-    if (completedTask) {
-      currentDailyXp += calculateModifiedXp(completedTask, index);
-    }
-  });
+  // 1. Calculate total XP already earned today from history to check against the cap.
+  // This correctly uses the final, stored XP for each completed task, fixing the recalculation bug.
+  const currentDailyXp = todaysHistory.reduce((sum, record) => sum + record.xpEarned, 0);
 
   // 2. Calculate XP for the *new* task.
-  const earnedXpForNewTask = calculateModifiedXp(task, todaysCompletionsIds.length);
+  const earnedXpForNewTask = calculateXpForNewTask(task);
 
   // 3. Determine the final XP to be awarded, respecting the daily cap.
   const remainingXpRoom = xpPolicy.dailyXpCap - currentDailyXp;

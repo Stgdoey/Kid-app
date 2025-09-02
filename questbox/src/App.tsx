@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Task,
@@ -9,7 +8,7 @@ import {
   SeasonsConfig,
   XPPolicy as IXPPolicy,
   AllProgress,
-  ThemeStyle,
+  ActiveTimer,
 } from './types';
 import { loadProgress, saveProgress, resetAllProgress, loadCustomThemes, saveCustomThemes } from './lib/storage';
 import { usePinVerification } from './lib/pin';
@@ -38,15 +37,15 @@ const profilesData: Profile[] = [
 ];
 
 const themesData: ThemesConfig = {
-  "default_light": { "name": "Default Light", "styles": { "bg": "bg-slate-100", "primary": "bg-white", "secondary": "bg-slate-200", "accent": "bg-blue-500", "text": "text-slate-800" } },
-  "default_dark": { "name": "Default Dark", "styles": { "bg": "bg-slate-900", "primary": "bg-slate-800", "secondary": "bg-slate-700", "accent": "bg-sky-500", "text": "text-slate-100" } },
-  "forest": { "name": "Forest Adventure", "styles": { "bg": "bg-emerald-900", "primary": "bg-emerald-800", "secondary": "bg-emerald-700", "accent": "bg-amber-400", "text": "text-stone-100" } },
-  "ocean": { "name": "Ocean Depths", "styles": { "bg": "bg-blue-900", "primary": "bg-blue-800", "secondary": "bg-blue-700", "accent": "bg-cyan-300", "text": "text-slate-100" } },
-  "space": { "name": "Cosmic Voyager", "styles": { "bg": "bg-indigo-950", "primary": "bg-indigo-900", "secondary": "bg-slate-800", "accent": "bg-fuchsia-500", "text": "text-slate-200" } },
-  "autumn": { "name": "Autumn", "styles": { "bg": "bg-orange-950", "primary": "bg-orange-900", "secondary": "bg-amber-800", "accent": "bg-yellow-400", "text": "text-orange-100" } },
-  "winter": { "name": "Winter", "styles": { "bg": "bg-slate-700", "primary": "bg-slate-600", "secondary": "bg-sky-900", "accent": "bg-cyan-400", "text": "text-white" } },
-  "spring": { "name": "Spring", "styles": { "bg": "bg-green-100", "primary": "bg-green-200", "secondary": "bg-pink-200", "accent": "bg-pink-400", "text": "text-green-900" } },
-  "summer": { "name": "Summer", "styles": { "bg": "bg-yellow-100", "primary": "bg-yellow-200", "secondary": "bg-sky-300", "accent": "bg-orange-500", "text": "text-gray-800" } }
+  "default_light": { "name": "Default Light", "styles": { "background": "#f1f5f9", "primary": "#ffffff", "secondary": "#e2e8f0", "accent": "#3b82f6", "text": "#1e293b", "textMuted": "#64748b" } },
+  "default_dark": { "name": "Default Dark", "styles": { "background": "#020617", "primary": "#0f172a", "secondary": "#1e293b", "accent": "#0ea5e9", "text": "#f1f5f9", "textMuted": "#94a3b8" } },
+  "forest": { "name": "Forest Adventure", "styles": { "background": "#064e3b", "primary": "#065f46", "secondary": "#047857", "accent": "#f59e0b", "text": "#f0fdf4", "textMuted": "#a3a3a3" } },
+  "ocean": { "name": "Ocean Depths", "styles": { "background": "#1e3a8a", "primary": "#1e40af", "secondary": "#1d4ed8", "accent": "#67e8f9", "text": "#f1f5f9", "textMuted": "#94a3b8" } },
+  "space": { "name": "Cosmic Voyager", "styles": { "background": "#1e1b4b", "primary": "#312e81", "secondary": "#1e293b", "accent": "#d946ef", "text": "#e0e7ff", "textMuted": "#a5b4fc" } },
+  "autumn": { "name": "Autumn", "styles": { "background": "#431407", "primary": "#7c2d12", "secondary": "#9a3412", "accent": "#facc15", "text": "#fff7ed", "textMuted": "#fed7aa" } },
+  "winter": { "name": "Winter", "styles": { "background": "#334155", "primary": "#475569", "secondary": "#0c4a6e", "accent": "#22d3ee", "text": "#ffffff", "textMuted": "#cbd5e1" } },
+  "spring": { "name": "Spring", "styles": { "background": "#dcfce7", "primary": "#bbf7d0", "secondary": "#fbcfe8", "accent": "#f472b6", "text": "#14532d", "textMuted": "#166534" } },
+  "summer": { "name": "Summer", "styles": { "background": "#fef3c7", "primary": "#fef9c3", "secondary": "#7dd3fc", "accent": "#f97316", "text": "#374151", "textMuted": "#4b5563" } }
 };
 
 const seasonsData: SeasonsConfig = {
@@ -56,7 +55,7 @@ const seasonsData: SeasonsConfig = {
     { "name": "Autumn", "theme": "autumn", "startDate": "2024-09-23", "endDate": "2024-12-20" },
     { "name": "Winter", "theme": "winter", "startDate": "2024-12-21", "endDate": "2025-03-19" }
   ],
-  "fallbackTheme": "default_light"
+  "fallbackTheme": "default_dark"
 };
 
 const xpPolicyData: IXPPolicy = {
@@ -84,16 +83,6 @@ import { processTaskCompletion, calculateLevel } from './lib/xpPolicy';
 import { generateQuest } from './lib/aiQuestGenerator';
 import { generateReward } from './lib/aiRewardGenerator';
 
-// Helper to apply theme styles, supporting both Tailwind classes and hex colors
-export const getStyleAndClasses = (value: string | undefined, property: 'bg' | 'text' | 'accent' = 'bg') => {
-  if (!value) return { style: {}, className: '' };
-  if (value.startsWith('#') || value.startsWith('rgb')) {
-    const styleProp = property === 'text' ? 'color' : 'backgroundColor';
-    return { style: { [styleProp]: value }, className: '' };
-  }
-  return { style: {}, className: value };
-};
-
 
 const App: React.FC = () => {
   // Config state now includes tasks that can be updated with AI quests
@@ -113,7 +102,7 @@ const App: React.FC = () => {
   const [validationError, setValidationError] = useState<string>('');
 
   // UI State
-  const [activeThemeKey, setActiveThemeKey] = useState<string>('default_light');
+  const [activeThemeKey, setActiveThemeKey] = useState<string>('default_dark');
   const [isThemeCreatorOpen, setIsThemeCreatorOpen] = useState(false);
   const [isRewardCreatorOpen, setIsRewardCreatorOpen] = useState(false);
   const [lastXpGain, setLastXpGain] = useState<{ amount: number; key: number } | null>(null);
@@ -126,6 +115,19 @@ const App: React.FC = () => {
   const [isGeneratingReward, setIsGeneratingReward] = useState(false);
   const [aiRewardError, setAiRewardError] = useState<string | null>(null);
 
+  // Apply theme by setting CSS variables on the root element
+  useEffect(() => {
+    const style = themes[activeThemeKey]?.styles;
+    if (style) {
+      const root = document.documentElement;
+      root.style.setProperty('--color-background', style.background);
+      root.style.setProperty('--color-primary', style.primary);
+      root.style.setProperty('--color-secondary', style.secondary);
+      root.style.setProperty('--color-accent', style.accent);
+      root.style.setProperty('--color-text', style.text);
+      root.style.setProperty('--color-text-muted', style.textMuted);
+    }
+  }, [activeThemeKey, themes]);
 
   useEffect(() => {
     try {
@@ -184,13 +186,77 @@ const App: React.FC = () => {
   const handleStartTimer = useCallback((taskId: string) => {
     if (!allProgress || !activeProfile) return;
     const currentProgress = allProgress[activeProfile.id];
+
+    const newTimer: ActiveTimer = {
+      startTime: new Date().toISOString(),
+      elapsedBeforePause: 0,
+    };
+
+    const newProgress = {
+      ...currentProgress,
+      activeTimers: {
+        ...(currentProgress.activeTimers || {}),
+        [taskId]: newTimer,
+      },
+    };
+    updateProgress(newProgress);
+  }, [allProgress, activeProfile, updateProgress]);
+
+  const handlePauseTimer = useCallback((taskId: string) => {
+    if (!allProgress || !activeProfile) return;
+    const currentProgress = allProgress[activeProfile.id];
+    const timer = currentProgress.activeTimers?.[taskId];
+
+    if (!timer || !timer.startTime) return; // Can't pause if not running
+
+    const elapsed = Date.now() - new Date(timer.startTime).getTime();
+    const newTimer: ActiveTimer = {
+      startTime: null,
+      elapsedBeforePause: timer.elapsedBeforePause + elapsed,
+    };
+
+    const newProgress = {
+      ...currentProgress,
+      activeTimers: {
+        ...currentProgress.activeTimers,
+        [taskId]: newTimer,
+      },
+    };
+    updateProgress(newProgress);
+  }, [allProgress, activeProfile, updateProgress]);
+
+  const handleResumeTimer = useCallback((taskId: string) => {
+    if (!allProgress || !activeProfile) return;
+    const currentProgress = allProgress[activeProfile.id];
+    const timer = currentProgress.activeTimers?.[taskId];
+
+    if (!timer || timer.startTime) return; // Can't resume if already running
+
+    const newTimer: ActiveTimer = {
+      startTime: new Date().toISOString(),
+      elapsedBeforePause: timer.elapsedBeforePause,
+    };
+
+    const newProgress = {
+      ...currentProgress,
+      activeTimers: {
+        ...currentProgress.activeTimers,
+        [taskId]: newTimer,
+      },
+    };
+    updateProgress(newProgress);
+  }, [allProgress, activeProfile, updateProgress]);
+
+  const handleResetTimer = useCallback((taskId: string) => {
+    if (!allProgress || !activeProfile) return;
+    const currentProgress = allProgress[activeProfile.id];
     
+    const newActiveTimers = { ...(currentProgress.activeTimers || {}) };
+    delete newActiveTimers[taskId];
+
     const newProgress = {
         ...currentProgress,
-        activeTimers: {
-            ...(currentProgress.activeTimers || {}),
-            [taskId]: new Date().toISOString(),
-        }
+        activeTimers: newActiveTimers,
     };
     updateProgress(newProgress);
   }, [allProgress, activeProfile, updateProgress]);
@@ -304,14 +370,12 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleSaveCustomTheme = (name: string, styles: ThemeStyle) => {
+  const handleSaveCustomTheme = (name: string, styles: any) => {
     const key = `custom_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
     const newTheme = { [key]: { name, styles } };
     
     setThemes(prevThemes => {
         const updatedThemes = { ...prevThemes, ...newTheme };
-        // FIX: The type of `customThemesToSave` was being inferred incorrectly, causing a type error.
-        // A type assertion is added to ensure TypeScript understands the object conforms to the ThemesConfig type.
         const customThemesToSave = Object.fromEntries(
             Object.entries(updatedThemes).filter(([k]) => k.startsWith('custom_'))
         );
@@ -339,11 +403,6 @@ const App: React.FC = () => {
   const handleSwitchUser = () => {
       setActiveProfile(null);
   };
-
-  const themeStyles = themes[activeThemeKey]?.styles || themes.default_light.styles;
-  const bgProps = getStyleAndClasses(themeStyles.bg, 'bg');
-  const textProps = getStyleAndClasses(themeStyles.text, 'text');
-
 
   if (!allProgress) {
     return (
@@ -373,10 +432,7 @@ const App: React.FC = () => {
   const currentProgress = allProgress[activeProfile.id];
 
   return (
-    <div
-      style={{ ...bgProps.style, ...textProps.style }}
-      className={`min-h-screen font-sans transition-colors duration-500 ${bgProps.className} ${textProps.className}`}
-    >
+    <div className="min-h-screen font-sans transition-colors duration-500 bg-background text-text-main animated-gradient-bg">
       <PinVerificationComponent />
       {levelUpInfo && (
           <LevelUpModal newLevel={levelUpInfo.newLevel} onClose={() => setLevelUpInfo(null)} />
@@ -405,7 +461,12 @@ const App: React.FC = () => {
         {validationError && <div className="bg-red-500 text-white p-2 rounded-md mb-4">{validationError}</div>}
         
         <header className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">QuestBox</h1>
+            <div className="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 text-amber-300">
+                    <path fillRule="evenodd" d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15zm4.125 3a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zM12 3.75a.75.75 0 01.75.75v15a.75.75 0 01-1.5 0v-15a.75.75 0 01.75-.75zM16.125 6.75a2.25 2.25 0 114.5 0 2.25 2.25 0 01-4.5 0z" clipRule="evenodd" />
+                </svg>
+                <h1 className="text-3xl md:text-4xl font-black tracking-tight">QuestBox</h1>
+            </div>
           <div className="text-right flex items-center gap-4">
              <div>
                 <div className="text-lg font-semibold">{activeProfile.name}'s Quests</div>
@@ -416,7 +477,7 @@ const App: React.FC = () => {
                     onOpenThemeCreator={() => setIsThemeCreatorOpen(true)}
                 />
              </div>
-             <button onClick={handleSwitchUser} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-md text-sm font-semibold transition-transform duration-200 hover:scale-105">Switch User</button>
+             <button onClick={handleSwitchUser} className="px-3 py-1 bg-secondary/50 hover:bg-secondary rounded-md text-sm font-semibold transition-all duration-200 hover:scale-105">Switch User</button>
           </div>
         </header>
 
@@ -430,11 +491,13 @@ const App: React.FC = () => {
                   progress={currentProgress}
                   onComplete={handleTaskComplete}
                   onStartTimer={handleStartTimer}
+                  onPauseTimer={handlePauseTimer}
+                  onResumeTimer={handleResumeTimer}
+                  onResetTimer={handleResetTimer}
                   onGenerateQuest={handleGenerateQuest}
                   onEditQuest={handleOpenTaskEditor}
                   isGeneratingQuest={isGeneratingQuest}
                   aiError={aiError}
-                  themeStyles={themeStyles}
                 />
                 <RewardShop
                   rewards={rewards}
@@ -444,13 +507,11 @@ const App: React.FC = () => {
                   onOpenRewardCreator={() => setIsRewardCreatorOpen(true)}
                   isGeneratingReward={isGeneratingReward}
                   aiError={aiRewardError}
-                  themeStyles={themeStyles}
                 />
             </div>
              <DataPanel 
               onResetProgress={handleResetProgress}
               progress={currentProgress}
-              themeStyles={themeStyles}
             />
           </div>
           <div className="lg:col-span-1 flex flex-col gap-6">
@@ -459,11 +520,9 @@ const App: React.FC = () => {
                 profiles={profiles}
                 xpPolicy={xpPolicy}
                 activeProfileId={activeProfile.id}
-                themeStyles={themeStyles}
               />
               <TaskHistory
                 history={currentProgress.completionHistory || []}
-                themeStyles={themeStyles}
               />
           </div>
         </main>

@@ -37,10 +37,23 @@ const progressSchema = {
         },
         "streakSavers": { "type": "integer" },
         "activeTimers": {
-            "type": "object",
-            "patternProperties": {
-                "^[a-zA-Z0-9_]+$": { "type": "string" }
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_]+$": {
+              "type": "object",
+              "properties": {
+                "startTime": {
+                  "type": ["string", "null"],
+                  "format": "date-time"
+                },
+                "elapsedBeforePause": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": ["startTime", "elapsedBeforePause"]
             }
+          }
         },
         "completionHistory": {
           "type": "array",
@@ -118,6 +131,19 @@ export function loadProgress(profiles: Profile[]): AllProgress {
         }
         if (!parsedData[p.id].activeTimers) {
             parsedData[p.id].activeTimers = {};
+        } else {
+            // Migration logic for old string-based timers
+            Object.keys(parsedData[p.id].activeTimers).forEach(taskId => {
+                const timerData = parsedData[p.id].activeTimers[taskId];
+                if (typeof timerData === 'string') {
+                    console.log(`Migrating timer for task ${taskId}...`);
+                    // Convert old format (ISO string) to new ActiveTimer object format
+                    parsedData[p.id].activeTimers[taskId] = {
+                        startTime: timerData,
+                        elapsedBeforePause: 0,
+                    };
+                }
+            });
         }
       });
       return parsedData as AllProgress;

@@ -31,11 +31,12 @@ const ColorInput: React.FC<{ label: string; value: string; onChange: (e: React.C
 const CustomThemeCreator: React.FC<CustomThemeCreatorProps> = ({ onClose, onSave, existingThemeNames }) => {
   const [name, setName] = useState('');
   const [styles, setStyles] = useState<ThemeStyle>({
-    bg: '#1e293b', // slate-800
-    primary: '#0f172a', // slate-900
-    secondary: '#334155', // slate-700
-    accent: '#0ea5e9', // sky-500
-    text: '#f1f5f9', // slate-100
+    background: '#020617',
+    primary: '#0f172a',
+    secondary: '#1e293b',
+    accent: '#0ea5e9',
+    text: '#f1f5f9',
+    textMuted: '#94a3b8'
   });
   const [error, setError] = useState('');
 
@@ -91,18 +92,19 @@ const CustomThemeCreator: React.FC<CustomThemeCreatorProps> = ({ onClose, onSave
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Live Preview</label>
               <div
-                style={{ backgroundColor: styles.bg, color: styles.text }}
+                style={{ backgroundColor: styles.background, color: styles.text }}
                 className="rounded-lg p-4 border border-slate-600 transition-colors"
                 aria-hidden="true" // This is a visual-only representation
               >
-                <div style={{ backgroundColor: styles.primary }} className="rounded-md p-3 shadow-inner">
+                <div style={{ backgroundColor: `${styles.primary}66` /* 40% opacity */ }} className="rounded-md p-3 shadow-inner backdrop-blur-sm border" >
                   <h3 className="font-bold text-lg mb-2">Card Title</h3>
-                  <div style={{ backgroundColor: styles.secondary }} className="rounded p-2 text-sm">
-                    <p>A secondary element.</p>
+                  <div style={{ backgroundColor: `${styles.secondary}80` /* 50% opacity */ }} className="rounded p-2 text-sm">
+                    <p style={{color: styles.textMuted}}>A secondary element.</p>
                   </div>
                   <button
                     style={{ backgroundColor: styles.accent }}
-                    className="w-full mt-3 px-3 py-1.5 rounded font-semibold text-white" // Using white text for best contrast
+                    className="w-full mt-3 px-3 py-1.5 rounded font-semibold"
+                    // Assume text on accent is always white for simplicity in preview
                   >
                     Accent Button
                   </button>
@@ -110,11 +112,13 @@ const CustomThemeCreator: React.FC<CustomThemeCreatorProps> = ({ onClose, onSave
               </div>
             </div>
 
-            <ColorInput label="Background" value={styles.bg} onChange={handleStyleChange('bg')} />
+            <ColorInput label="Background" value={styles.background} onChange={handleStyleChange('background')} />
             <ColorInput label="Primary" value={styles.primary} onChange={handleStyleChange('primary')} />
             <ColorInput label="Secondary" value={styles.secondary} onChange={handleStyleChange('secondary')} />
             <ColorInput label="Accent" value={styles.accent} onChange={handleStyleChange('accent')} />
             <ColorInput label="Text" value={styles.text} onChange={handleStyleChange('text')} />
+            <ColorInput label="Muted Text" value={styles.textMuted} onChange={handleStyleChange('textMuted')} />
+
         </div>
 
         {error && <p className="text-red-400 text-sm mt-3 text-center">{error}</p>}

@@ -32,8 +32,18 @@
           "type": "object",
           "patternProperties": {
             "^[a-zA-Z0-9_]+$": {
-              "type": "string",
-              "format": "date-time"
+              "type": "object",
+              "properties": {
+                "startTime": {
+                  "type": ["string", "null"],
+                  "format": "date-time"
+                },
+                "elapsedBeforePause": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": ["startTime", "elapsedBeforePause"]
             }
           }
         },

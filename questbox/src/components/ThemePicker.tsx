@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { ThemesConfig, SeasonsConfig, Theme } from '../types';
 import { getActiveSeasonTheme } from '../lib/seasonsLoader';
@@ -14,12 +13,12 @@ type ThemeMode = 'manual' | 'auto' | 'seasonal';
 
 const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChange, onOpenThemeCreator }) => {
   const [mode, setMode] = useState<ThemeMode>('seasonal');
-  const [manualTheme, setManualTheme] = useState<string>('default_light');
+  const [manualTheme, setManualTheme] = useState<string>('default_dark');
   
   const seasonalTheme = useMemo(() => getActiveSeasonTheme(seasons), [seasons]);
 
   useEffect(() => {
-    let newTheme = 'default_light';
+    let newTheme = 'default_dark';
     if (mode === 'seasonal') {
       newTheme = seasonalTheme;
     } else if (mode === 'auto') {
@@ -47,7 +46,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
         <select 
             value={mode}
             onChange={(e) => setMode(e.target.value as ThemeMode)}
-            className="bg-slate-700 text-white text-sm rounded-md p-1 border-transparent focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            className="bg-secondary/50 text-text-main text-sm rounded-md p-1 border border-transparent focus:ring-2 focus:ring-accent focus:border-transparent"
         >
             <option value="seasonal">Seasonal</option>
             <option value="auto">Auto</option>
@@ -58,7 +57,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
             <select
                 value={manualTheme}
                 onChange={(e) => setManualTheme(e.target.value)}
-                className="bg-slate-700 text-white text-sm rounded-md p-1 border-transparent focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="bg-secondary/50 text-text-main text-sm rounded-md p-1 border-transparent focus:ring-2 focus:ring-accent focus:border-transparent"
             >
                 {/* FIX: Replaced Object.entries with Object.keys to avoid type inference issues where the theme object was being treated as 'unknown'. */}
                 {Object.keys(themes).map((key) => (
@@ -67,7 +66,7 @@ const ThemePicker: React.FC<ThemePickerProps> = ({ themes, seasons, onThemeChang
             </select>
             <button
                 onClick={onOpenThemeCreator}
-                className="text-sm bg-slate-600 hover:bg-slate-500 rounded-md px-2 py-1"
+                className="text-sm bg-secondary/80 hover:bg-secondary rounded-md px-2 py-1"
                 aria-label="Create new custom theme"
             >
                 Create...

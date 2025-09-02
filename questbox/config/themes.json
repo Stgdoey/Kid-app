@@ -1,93 +1,101 @@
-
 {
   "default_light": {
     "name": "Default Light",
     "styles": {
-      "bg": "bg-slate-100",
-      "primary": "bg-white",
-      "secondary": "bg-slate-200",
-      "accent": "bg-blue-500",
-      "text": "text-slate-800"
+      "background": "#f1f5f9",
+      "primary": "#ffffff",
+      "secondary": "#e2e8f0",
+      "accent": "#3b82f6",
+      "text": "#1e293b",
+      "textMuted": "#64748b"
     }
   },
   "default_dark": {
     "name": "Default Dark",
     "styles": {
-      "bg": "bg-slate-900",
-      "primary": "bg-slate-800",
-      "secondary": "bg-slate-700",
-      "accent": "bg-sky-500",
-      "text": "text-slate-100"
+      "background": "#020617",
+      "primary": "#0f172a",
+      "secondary": "#1e293b",
+      "accent": "#0ea5e9",
+      "text": "#f1f5f9",
+      "textMuted": "#94a3b8"
     }
   },
   "forest": {
     "name": "Forest Adventure",
     "styles": {
-      "bg": "bg-emerald-900",
-      "primary": "bg-emerald-800",
-      "secondary": "bg-emerald-700",
-      "accent": "bg-amber-400",
-      "text": "text-stone-100"
+      "background": "#064e3b",
+      "primary": "#065f46",
+      "secondary": "#047857",
+      "accent": "#f59e0b",
+      "text": "#f0fdf4",
+      "textMuted": "#a3a3a3"
     }
   },
   "ocean": {
     "name": "Ocean Depths",
     "styles": {
-      "bg": "bg-blue-900",
-      "primary": "bg-blue-800",
-      "secondary": "bg-blue-700",
-      "accent": "bg-cyan-300",
-      "text": "text-slate-100"
+      "background": "#1e3a8a",
+      "primary": "#1e40af",
+      "secondary": "#1d4ed8",
+      "accent": "#67e8f9",
+      "text": "#f1f5f9",
+      "textMuted": "#94a3b8"
     }
   },
   "space": {
     "name": "Cosmic Voyager",
     "styles": {
-      "bg": "bg-indigo-950",
-      "primary": "bg-indigo-900",
-      "secondary": "bg-slate-800",
-      "accent": "bg-fuchsia-500",
-      "text": "text-slate-200"
+      "background": "#1e1b4b",
+      "primary": "#312e81",
+      "secondary": "#1e293b",
+      "accent": "#d946ef",
+      "text": "#e0e7ff",
+      "textMuted": "#a5b4fc"
     }
   },
   "autumn": {
     "name": "Autumn",
     "styles": {
-      "bg": "bg-orange-950",
-      "primary": "bg-orange-900",
-      "secondary": "bg-amber-800",
-      "accent": "bg-yellow-400",
-      "text": "text-orange-100"
+      "background": "#431407",
+      "primary": "#7c2d12",
+      "secondary": "#9a3412",
+      "accent": "#facc15",
+      "text": "#fff7ed",
+      "textMuted": "#fed7aa"
     }
   },
   "winter": {
     "name": "Winter",
     "styles": {
-      "bg": "bg-slate-700",
-      "primary": "bg-slate-600",
-      "secondary": "bg-sky-900",
-      "accent": "bg-cyan-400",
-      "text": "text-white"
+      "background": "#334155",
+      "primary": "#475569",
+      "secondary": "#0c4a6e",
+      "accent": "#22d3ee",
+      "text": "#ffffff",
+      "textMuted": "#cbd5e1"
     }
   },
   "spring": {
     "name": "Spring",
     "styles": {
-      "bg": "bg-green-100",
-      "primary": "bg-green-200",
-      "secondary": "bg-pink-200",
-      "accent": "bg-pink-400",
-      "text": "text-green-900"
+      "background": "#dcfce7",
+      "primary": "#bbf7d0",
+      "secondary": "#fbcfe8",
+      "accent": "#f472b6",
+      "text": "#14532d",
+      "textMuted": "#166534"
     }
   },
   "summer": {
     "name": "Summer",
     "styles": {
-      "bg": "bg-yellow-100",
-      "primary": "bg-yellow-200",
-      "secondary": "bg-sky-300",
-      "accent": "bg-orange-500",
-      "text": "text-gray-800"
+      "background": "#fef3c7",
+      "primary": "#fef9c3",
+      "secondary": "#7dd3fc",
+      "accent": "#f97316",
+      "text": "#374151",
+      "textMuted": "#4b5563"
     }
   }
 }

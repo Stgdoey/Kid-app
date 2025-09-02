@@ -18,7 +18,8 @@
     "vite": "^7.1.4",
     "@vitejs/plugin-react": "^5.0.2",
     "path": "^0.12.7",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
