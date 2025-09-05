@@ -1,13 +1,6 @@
 {
-  "xpPerLevel": 500,
-  "dailyXpCap": 200,
-  "streakBonus": {
-    "days": 3,
-    "multiplier": 1.5
-  },
-  "diminishingReturns": {
-    "afterTaskCount": 3,
-    "reductionFactor": 0.4
-  },
-  "noStreakReductionFactor": 0.8
+  "baseXP": 100,
+  "levelCurve": [0, 100, 250, 500, 1000, 2000],
+  "streakBonus": 10,
+  "decayDays": 2
 }
